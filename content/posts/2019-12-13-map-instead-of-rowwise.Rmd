@@ -1,0 +1,82 @@
+---
+title: map instead of rowwise
+author: Caroline Ledbetter
+date: '2019-12-13'
+slug: map-instead-of-rowwise
+categories:
+  - R
+tags:
+  - map
+---
+
+# Setup dummy data frame
+
+```{r, message = F}
+library(tidyverse)
+```
+
+```{r, results = 'hide'}
+set.seed(1313)
+dat <- tibble(!!!c(id = list(1:10), 
+  int_ = replicate(4, sample.int(10), simplify = F), 
+  lgl_ = replicate(4, sample(c(T, F), 10, replace = T), simplify = F), 
+  chr_ = replicate(4, sample(c("A", "B", "C"), 10, replace = T), simplify = F)
+), .name_repair = 'universal') %>% 
+  rename_all(str_remove_all, pattern = '\\.')
+
+```
+
+```{r}
+dat
+```
+
+# use pmap
+
+```{r}
+dat %>% 
+  select(starts_with('int')) %>% 
+  pmap_int(sum) %>% 
+  bind_cols(dat, sum = .) %>% 
+  select(int_1:int_4, lgl_1, sum)
+
+dat %>% 
+  select(starts_with('lgl')) %>% 
+  pmap_lgl(all)
+
+dat %>% 
+  select(starts_with('lgl')) %>% 
+  pmap_lgl(all)  %>% 
+  bind_cols(dat, all_true = .) %>% 
+  select(int_1:int_2, lgl_1:lgl_4, all_true)
+
+dat %>% 
+  select(starts_with('lgl')) %>% 
+  pmap_lgl(any)
+
+```
+
+# use nest and rowwise
+```{r}
+dat %>%
+  group_by(id) %>%
+   nest(int_vars = starts_with('int'), 
+        lgl_vars = contains('lgl'), 
+        chr_vars = c(chr_1, chr_2, chr_3, chr_4)) %>% 
+   mutate(sum = map_int(int_vars, sum), 
+          all_t = map_lgl(lgl_vars, function(x) all(unlist(x))), 
+          any_b = map_lgl(chr_vars, function(x) {any(map_lgl(x, ~. == 'B'))}), 
+          any_c = map_lgl(chr_vars, function(x) any(unlist(x) == 'C')), 
+          any_a = map_lgl(chr_vars, function(x) any(unlist(x) == 'A'))
+          ) %>% 
+  unnest(cols = c(int_vars, lgl_vars, chr_vars))
+```
+
+# vs summarise
+```{r}
+
+dat %>% 
+  group_by(id) %>% 
+  summarise_if(is.numeric, sum)
+```
+
+
