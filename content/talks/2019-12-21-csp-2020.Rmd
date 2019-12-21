@@ -1,0 +1,19 @@
+---
+title: CSP 2020
+author: Caroline Ledbetter
+date: '2020-02-20'
+publishDate: '2019-12-21'
+slug: csp-2020
+categories:
+  - R
+tags:
+  - Statistics
+lastmod: '2019-12-21T09:06:20-07:00'
+description: ''
+show_in_homepage: yes
+---
+# [Conference on Statistical Practice](https://ww2.amstat.org/meetings/csp/2020/)  
+Feb 20, 2020  
+ *Step-Wedge Design to Evaluate the Effectiveness of Opioid Prescribing Aids*   
+Not a talk, but I will be presenting my ePoster. If you are attending, stop by!
+
