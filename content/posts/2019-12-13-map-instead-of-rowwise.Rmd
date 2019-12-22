@@ -10,7 +10,25 @@ tags:
   - tidyverse
 ---
 
-# Setup dummy data frame
+I recently came across 
+[this post on alternatives to rowwise](https://community.rstudio.com/t/dplyr-alternatives-to-rowwise/8071) 
+and it got me thinking about the situations where I tend to use `rowwise()` and 
+how I might use alternatives. One of the first things I realized is that 
+nearly every instance where I use `rowwise()` could be replaced by 
+`group_by(id_column)`. For someone who always found the `apply` family fairly 
+straightforward and intuitive - I must confess, I've struggled more with the
+`purrr::map` family. They do however have a number of advantages over the 
+`apply` family - namily unified syntex and the ability to specify the output 
+type. I also really like the ability to bind data frame 
+rows with a column for the source (`map_dfr(..., .id = 'source')`). This post 
+is my attempt to think through some of the ways I can use `pmap` and 
+nested columns with `map` in place of rowwise. 
+
+# the process  
+**Setup dummy data frame**   
+I've set up a data frame with integer, logical and character columns because 
+most of what I use `rowwise` for is testing for conditions, the presence of a 
+value or numeric manipulation (sum, min, etc.).
 
 ```{r, message = F}
 library(tidyverse)
@@ -19,9 +37,9 @@ library(tidyverse)
 ```{r, results = 'hide'}
 set.seed(1313)
 dat <- tibble(!!!c(id = list(1:10), 
-  int_ = replicate(4, sample.int(10), simplify = F), 
-  lgl_ = replicate(4, sample(c(T, F), 10, replace = T), simplify = F), 
-  chr_ = replicate(4, sample(c("A", "B", "C"), 10, replace = T), simplify = F)
+  int_ = replicate(3, sample.int(10), simplify = F), 
+  lgl_ = replicate(3, sample(c(T, F), 10, replace = T), simplify = F), 
+  chr_ = replicate(3, sample(c("A", "B", "C"), 10, replace = T), simplify = F)
 ), .name_repair = 'universal') %>% 
   rename_all(str_remove_all, pattern = '\\.')
 
@@ -31,24 +49,36 @@ dat <- tibble(!!!c(id = list(1:10),
 dat
 ```
 
-# use pmap
+## use pmap  
+`pmap` seems to be what I want when I really don't have a grouping variable, 
+I want to do something rowwise even if I have multiple observations (lines) 
+per id and/or I really want a vector output. `pmap` takes the column names as
+the names of the arguments. 
+
+```{r}
+dat %>% 
+  select(starts_with('lgl')) %>% 
+  pmap_lgl(all)
+```
+ 
+In the above example for the first row pmap would correspond to:
+`all(lgl_1 = TRUE, lgl_2 = TRUE, lgl_3 = FALSE)` and thus it returns 
+`FALSE`. 
+
+It can be combined with `bind_cols` to append the vector as new column.  
 
 ```{r}
 dat %>% 
   select(starts_with('int')) %>% 
   pmap_int(sum) %>% 
   bind_cols(dat, sum = .) %>% 
-  select(int_1:int_4, lgl_1, sum)
-
-dat %>% 
-  select(starts_with('lgl')) %>% 
-  pmap_lgl(all)
+  select(int_1:int_3, lgl_1, sum)
 
 dat %>% 
   select(starts_with('lgl')) %>% 
   pmap_lgl(all)  %>% 
   bind_cols(dat, all_true = .) %>% 
-  select(int_1:int_2, lgl_1:lgl_4, all_true)
+  select(int_1:int_2, lgl_1:lgl_3, all_true)
 
 dat %>% 
   select(starts_with('lgl')) %>% 
@@ -56,13 +86,14 @@ dat %>%
 
 ```
 
-# use nest and rowwise
+## use nest and rowwise
+
 ```{r}
 dat %>%
   group_by(id) %>%
    nest(int_vars = starts_with('int'), 
         lgl_vars = contains('lgl'), 
-        chr_vars = c(chr_1, chr_2, chr_3, chr_4)) %>% 
+        chr_vars = c(chr_1, chr_2, chr_3)) %>% 
    mutate(sum = map_int(int_vars, sum), 
           all_t = map_lgl(lgl_vars, function(x) all(unlist(x))), 
           any_b = map_lgl(chr_vars, function(x) {any(map_lgl(x, ~. == 'B'))}), 
@@ -72,7 +103,7 @@ dat %>%
   unnest(cols = c(int_vars, lgl_vars, chr_vars))
 ```
 
-# vs summarise
+## vs summarize
 ```{r}
 
 dat %>% 

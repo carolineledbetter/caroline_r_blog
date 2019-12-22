@@ -12,85 +12,109 @@ tags:
 
 
 
-<div id="setup-dummy-data-frame" class="section level1">
-<h1>Setup dummy data frame</h1>
+<p>I recently came across
+<a href="https://community.rstudio.com/t/dplyr-alternatives-to-rowwise/8071">this post on alternatives to rowwise</a>
+and it got me thinking about the situations where I tend to use <code>rowwise()</code> and
+how I might use alternatives. One of the first things I realized is that
+nearly every instance where I use <code>rowwise()</code> could be replaced by
+<code>group_by(id_column)</code>. For someone who always found the <code>apply</code> family fairly
+straightforward and intuitive - I must confess, I’ve struggled more with the
+<code>purrr::map</code> family. They do however have a number of advantages over the
+<code>apply</code> family - namily unified syntex and the ability to specify the output
+type. I also really like the ability to bind data frame
+rows with a column for the source (<code>map_dfr(..., .id = 'source')</code>). This post
+is my attempt to think through some of the ways I can use <code>pmap</code> and
+nested columns with <code>map</code> in place of rowwise.</p>
+<div id="the-process" class="section level1">
+<h1>the process</h1>
+<p><strong>Setup dummy data frame</strong><br />
+I’ve set up a data frame with integer, logical and character columns because
+most of what I use <code>rowwise</code> for is testing for conditions, the presence of a
+value or numeric manipulation (sum, min, etc.).</p>
 <pre class="r"><code>library(tidyverse)</code></pre>
 <pre class="r"><code>set.seed(1313)
 dat &lt;- tibble(!!!c(id = list(1:10), 
-  int_ = replicate(4, sample.int(10), simplify = F), 
-  lgl_ = replicate(4, sample(c(T, F), 10, replace = T), simplify = F), 
-  chr_ = replicate(4, sample(c(&quot;A&quot;, &quot;B&quot;, &quot;C&quot;), 10, replace = T), simplify = F)
+  int_ = replicate(3, sample.int(10), simplify = F), 
+  lgl_ = replicate(3, sample(c(T, F), 10, replace = T), simplify = F), 
+  chr_ = replicate(3, sample(c(&quot;A&quot;, &quot;B&quot;, &quot;C&quot;), 10, replace = T), simplify = F)
 ), .name_repair = &#39;universal&#39;) %&gt;% 
   rename_all(str_remove_all, pattern = &#39;\\.&#39;)</code></pre>
 <pre class="r"><code>dat</code></pre>
-<pre><code>## # A tibble: 10 x 13
-##       id int_1 int_2 int_3 int_4 lgl_1 lgl_2 lgl_3 lgl_4 chr_1 chr_2 chr_3 chr_4
-##    &lt;int&gt; &lt;int&gt; &lt;int&gt; &lt;int&gt; &lt;int&gt; &lt;lgl&gt; &lt;lgl&gt; &lt;lgl&gt; &lt;lgl&gt; &lt;chr&gt; &lt;chr&gt; &lt;chr&gt; &lt;chr&gt;
-##  1     1     3     6     9     4 TRUE  TRUE  FALSE TRUE  C     C     C     A    
-##  2     2     6    10     3     6 TRUE  TRUE  FALSE TRUE  C     B     C     B    
-##  3     3    10     2     7     2 FALSE TRUE  TRUE  FALSE C     B     C     B    
-##  4     4     1     4     2    10 TRUE  TRUE  FALSE TRUE  B     C     A     B    
-##  5     5     4     1     1     8 FALSE TRUE  TRUE  TRUE  C     C     B     B    
-##  6     6     7     7    10     9 FALSE FALSE TRUE  TRUE  A     A     A     B    
-##  7     7     8     8     4     1 TRUE  FALSE FALSE TRUE  B     A     C     C    
-##  8     8     2     3     6     5 TRUE  FALSE FALSE TRUE  B     A     A     C    
-##  9     9     9     5     8     7 FALSE TRUE  TRUE  TRUE  A     C     C     B    
-## 10    10     5     9     5     3 FALSE FALSE TRUE  TRUE  B     C     A     B</code></pre>
-</div>
-<div id="use-pmap" class="section level1">
-<h1>use pmap</h1>
-<pre class="r"><code>dat %&gt;% 
-  select(starts_with(&#39;int&#39;)) %&gt;% 
-  pmap_int(sum) %&gt;% 
-  bind_cols(dat, sum = .) %&gt;% 
-  select(int_1:int_4, lgl_1, sum)</code></pre>
-<pre><code>## # A tibble: 10 x 6
-##    int_1 int_2 int_3 int_4 lgl_1   sum
-##    &lt;int&gt; &lt;int&gt; &lt;int&gt; &lt;int&gt; &lt;lgl&gt; &lt;int&gt;
-##  1     3     6     9     4 TRUE     22
-##  2     6    10     3     6 TRUE     25
-##  3    10     2     7     2 FALSE    21
-##  4     1     4     2    10 TRUE     17
-##  5     4     1     1     8 FALSE    14
-##  6     7     7    10     9 FALSE    33
-##  7     8     8     4     1 TRUE     21
-##  8     2     3     6     5 TRUE     16
-##  9     9     5     8     7 FALSE    29
-## 10     5     9     5     3 FALSE    22</code></pre>
+<pre><code>## # A tibble: 10 x 10
+##       id int_1 int_2 int_3 lgl_1 lgl_2 lgl_3 chr_1 chr_2 chr_3
+##    &lt;int&gt; &lt;int&gt; &lt;int&gt; &lt;int&gt; &lt;lgl&gt; &lt;lgl&gt; &lt;lgl&gt; &lt;chr&gt; &lt;chr&gt; &lt;chr&gt;
+##  1     1     3     6     9 FALSE TRUE  TRUE  B     B     C    
+##  2     2     6    10     3 FALSE TRUE  TRUE  A     A     B    
+##  3     3    10     2     7 FALSE FALSE TRUE  B     A     C    
+##  4     4     1     4     2 FALSE TRUE  TRUE  C     C     A    
+##  5     5     4     1     1 FALSE FALSE TRUE  A     C     B    
+##  6     6     7     7    10 FALSE FALSE FALSE B     C     B    
+##  7     7     8     8     4 TRUE  TRUE  FALSE C     C     A    
+##  8     8     2     3     6 FALSE TRUE  FALSE C     C     B    
+##  9     9     9     5     8 TRUE  FALSE TRUE  C     C     C    
+## 10    10     5     9     5 FALSE FALSE FALSE C     C     B</code></pre>
+<div id="use-pmap" class="section level2">
+<h2>use pmap</h2>
+<p><code>pmap</code> seems to be what I want when I really don’t have a grouping variable,
+I want to do something rowwise even if I have multiple observations (lines)
+per id and/or I really want a vector output. <code>pmap</code> takes the column names as
+the names of the arguments.</p>
 <pre class="r"><code>dat %&gt;% 
   select(starts_with(&#39;lgl&#39;)) %&gt;% 
   pmap_lgl(all)</code></pre>
 <pre><code>##  [1] FALSE FALSE FALSE FALSE FALSE FALSE FALSE FALSE FALSE FALSE</code></pre>
+<p>In the above example for the first row pmap would correspond to:
+<code>all(lgl_1 = TRUE, lgl_2 = TRUE, lgl_3 = FALSE)</code> and thus it returns
+<code>FALSE</code>.</p>
+<p>It can be combined with <code>bind_cols</code> to append the vector as new column.</p>
+<pre class="r"><code>dat %&gt;% 
+  select(starts_with(&#39;int&#39;)) %&gt;% 
+  pmap_int(sum) %&gt;% 
+  bind_cols(dat, sum = .) %&gt;% 
+  select(int_1:int_3, lgl_1, sum)</code></pre>
+<pre><code>## # A tibble: 10 x 5
+##    int_1 int_2 int_3 lgl_1   sum
+##    &lt;int&gt; &lt;int&gt; &lt;int&gt; &lt;lgl&gt; &lt;int&gt;
+##  1     3     6     9 FALSE    18
+##  2     6    10     3 FALSE    19
+##  3    10     2     7 FALSE    19
+##  4     1     4     2 FALSE     7
+##  5     4     1     1 FALSE     6
+##  6     7     7    10 FALSE    24
+##  7     8     8     4 TRUE     20
+##  8     2     3     6 FALSE    11
+##  9     9     5     8 TRUE     22
+## 10     5     9     5 FALSE    19</code></pre>
 <pre class="r"><code>dat %&gt;% 
   select(starts_with(&#39;lgl&#39;)) %&gt;% 
   pmap_lgl(all)  %&gt;% 
   bind_cols(dat, all_true = .) %&gt;% 
-  select(int_1:int_2, lgl_1:lgl_4, all_true)</code></pre>
-<pre><code>## # A tibble: 10 x 7
-##    int_1 int_2 lgl_1 lgl_2 lgl_3 lgl_4 all_true
-##    &lt;int&gt; &lt;int&gt; &lt;lgl&gt; &lt;lgl&gt; &lt;lgl&gt; &lt;lgl&gt; &lt;lgl&gt;   
-##  1     3     6 TRUE  TRUE  FALSE TRUE  FALSE   
-##  2     6    10 TRUE  TRUE  FALSE TRUE  FALSE   
-##  3    10     2 FALSE TRUE  TRUE  FALSE FALSE   
-##  4     1     4 TRUE  TRUE  FALSE TRUE  FALSE   
-##  5     4     1 FALSE TRUE  TRUE  TRUE  FALSE   
-##  6     7     7 FALSE FALSE TRUE  TRUE  FALSE   
-##  7     8     8 TRUE  FALSE FALSE TRUE  FALSE   
-##  8     2     3 TRUE  FALSE FALSE TRUE  FALSE   
-##  9     9     5 FALSE TRUE  TRUE  TRUE  FALSE   
-## 10     5     9 FALSE FALSE TRUE  TRUE  FALSE</code></pre>
+  select(int_1:int_2, lgl_1:lgl_3, all_true)</code></pre>
+<pre><code>## # A tibble: 10 x 6
+##    int_1 int_2 lgl_1 lgl_2 lgl_3 all_true
+##    &lt;int&gt; &lt;int&gt; &lt;lgl&gt; &lt;lgl&gt; &lt;lgl&gt; &lt;lgl&gt;   
+##  1     3     6 FALSE TRUE  TRUE  FALSE   
+##  2     6    10 FALSE TRUE  TRUE  FALSE   
+##  3    10     2 FALSE FALSE TRUE  FALSE   
+##  4     1     4 FALSE TRUE  TRUE  FALSE   
+##  5     4     1 FALSE FALSE TRUE  FALSE   
+##  6     7     7 FALSE FALSE FALSE FALSE   
+##  7     8     8 TRUE  TRUE  FALSE FALSE   
+##  8     2     3 FALSE TRUE  FALSE FALSE   
+##  9     9     5 TRUE  FALSE TRUE  FALSE   
+## 10     5     9 FALSE FALSE FALSE FALSE</code></pre>
 <pre class="r"><code>dat %&gt;% 
   select(starts_with(&#39;lgl&#39;)) %&gt;% 
   pmap_lgl(any)</code></pre>
-<pre><code>##  [1] TRUE TRUE TRUE TRUE TRUE TRUE TRUE TRUE TRUE TRUE</code></pre>
+<pre><code>##  [1]  TRUE  TRUE  TRUE  TRUE  TRUE FALSE  TRUE  TRUE  TRUE FALSE</code></pre>
 </div>
-<div id="use-nest-and-rowwise" class="section level1">
-<h1>use nest and rowwise</h1>
+<div id="use-nest-and-rowwise" class="section level2">
+<h2>use nest and rowwise</h2>
 <pre class="r"><code>dat %&gt;%
   group_by(id) %&gt;%
    nest(int_vars = starts_with(&#39;int&#39;), 
         lgl_vars = contains(&#39;lgl&#39;), 
-        chr_vars = c(chr_1, chr_2, chr_3, chr_4)) %&gt;% 
+        chr_vars = c(chr_1, chr_2, chr_3)) %&gt;% 
    mutate(sum = map_int(int_vars, sum), 
           all_t = map_lgl(lgl_vars, function(x) all(unlist(x))), 
           any_b = map_lgl(chr_vars, function(x) {any(map_lgl(x, ~. == &#39;B&#39;))}), 
@@ -98,39 +122,39 @@ dat &lt;- tibble(!!!c(id = list(1:10),
           any_a = map_lgl(chr_vars, function(x) any(unlist(x) == &#39;A&#39;))
           ) %&gt;% 
   unnest(cols = c(int_vars, lgl_vars, chr_vars))</code></pre>
-<pre><code>## # A tibble: 10 x 18
+<pre><code>## # A tibble: 10 x 15
 ## # Groups:   id [10]
-##       id int_1 int_2 int_3 int_4 lgl_1 lgl_2 lgl_3 lgl_4 chr_1 chr_2 chr_3 chr_4
-##    &lt;int&gt; &lt;int&gt; &lt;int&gt; &lt;int&gt; &lt;int&gt; &lt;lgl&gt; &lt;lgl&gt; &lt;lgl&gt; &lt;lgl&gt; &lt;chr&gt; &lt;chr&gt; &lt;chr&gt; &lt;chr&gt;
-##  1     1     3     6     9     4 TRUE  TRUE  FALSE TRUE  C     C     C     A    
-##  2     2     6    10     3     6 TRUE  TRUE  FALSE TRUE  C     B     C     B    
-##  3     3    10     2     7     2 FALSE TRUE  TRUE  FALSE C     B     C     B    
-##  4     4     1     4     2    10 TRUE  TRUE  FALSE TRUE  B     C     A     B    
-##  5     5     4     1     1     8 FALSE TRUE  TRUE  TRUE  C     C     B     B    
-##  6     6     7     7    10     9 FALSE FALSE TRUE  TRUE  A     A     A     B    
-##  7     7     8     8     4     1 TRUE  FALSE FALSE TRUE  B     A     C     C    
-##  8     8     2     3     6     5 TRUE  FALSE FALSE TRUE  B     A     A     C    
-##  9     9     9     5     8     7 FALSE TRUE  TRUE  TRUE  A     C     C     B    
-## 10    10     5     9     5     3 FALSE FALSE TRUE  TRUE  B     C     A     B    
-## # … with 5 more variables: sum &lt;int&gt;, all_t &lt;lgl&gt;, any_b &lt;lgl&gt;, any_c &lt;lgl&gt;,
-## #   any_a &lt;lgl&gt;</code></pre>
+##       id int_1 int_2 int_3 lgl_1 lgl_2 lgl_3 chr_1 chr_2 chr_3   sum all_t any_b
+##    &lt;int&gt; &lt;int&gt; &lt;int&gt; &lt;int&gt; &lt;lgl&gt; &lt;lgl&gt; &lt;lgl&gt; &lt;chr&gt; &lt;chr&gt; &lt;chr&gt; &lt;int&gt; &lt;lgl&gt; &lt;lgl&gt;
+##  1     1     3     6     9 FALSE TRUE  TRUE  B     B     C        18 FALSE TRUE 
+##  2     2     6    10     3 FALSE TRUE  TRUE  A     A     B        19 FALSE TRUE 
+##  3     3    10     2     7 FALSE FALSE TRUE  B     A     C        19 FALSE TRUE 
+##  4     4     1     4     2 FALSE TRUE  TRUE  C     C     A         7 FALSE FALSE
+##  5     5     4     1     1 FALSE FALSE TRUE  A     C     B         6 FALSE TRUE 
+##  6     6     7     7    10 FALSE FALSE FALSE B     C     B        24 FALSE TRUE 
+##  7     7     8     8     4 TRUE  TRUE  FALSE C     C     A        20 FALSE FALSE
+##  8     8     2     3     6 FALSE TRUE  FALSE C     C     B        11 FALSE TRUE 
+##  9     9     9     5     8 TRUE  FALSE TRUE  C     C     C        22 FALSE FALSE
+## 10    10     5     9     5 FALSE FALSE FALSE C     C     B        19 FALSE TRUE 
+## # … with 2 more variables: any_c &lt;lgl&gt;, any_a &lt;lgl&gt;</code></pre>
 </div>
-<div id="vs-summarise" class="section level1">
-<h1>vs summarise</h1>
+<div id="vs-summarize" class="section level2">
+<h2>vs summarize</h2>
 <pre class="r"><code>dat %&gt;% 
   group_by(id) %&gt;% 
   summarise_if(is.numeric, sum)</code></pre>
-<pre><code>## # A tibble: 10 x 5
-##       id int_1 int_2 int_3 int_4
-##    &lt;int&gt; &lt;int&gt; &lt;int&gt; &lt;int&gt; &lt;int&gt;
-##  1     1     3     6     9     4
-##  2     2     6    10     3     6
-##  3     3    10     2     7     2
-##  4     4     1     4     2    10
-##  5     5     4     1     1     8
-##  6     6     7     7    10     9
-##  7     7     8     8     4     1
-##  8     8     2     3     6     5
-##  9     9     9     5     8     7
-## 10    10     5     9     5     3</code></pre>
+<pre><code>## # A tibble: 10 x 4
+##       id int_1 int_2 int_3
+##    &lt;int&gt; &lt;int&gt; &lt;int&gt; &lt;int&gt;
+##  1     1     3     6     9
+##  2     2     6    10     3
+##  3     3    10     2     7
+##  4     4     1     4     2
+##  5     5     4     1     1
+##  6     6     7     7    10
+##  7     7     8     8     4
+##  8     8     2     3     6
+##  9     9     9     5     8
+## 10    10     5     9     5</code></pre>
+</div>
 </div>
