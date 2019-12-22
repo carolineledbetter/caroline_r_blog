@@ -13,8 +13,14 @@ R enthusiast and reproducible research evangelist.
 [Email](mailto:carolineledbetter@yahoo.com)  
 
 # Education  
-- :(mortarboard): MPH Biostatistics and Epidemiology, Colorado School of Public Health, 
-University of Colorado  
-- :(mortarboard): BA Biochemistry, University of Colorado  
+:mortar_board: MPH Biostatistics and Epidemiology, 
+    Colorado School of Public Health, 
+    University of Colorado  
+:mortar_board: BA Biochemistry, University of Colorado  
+
+# Cool R Stuff
+[CIDAtools (R package)](www.github.com/ledbettc/CIDAtools/)  
+[Food Source Attribution (Shiny Web App)](https://coe-foodsafetytools.shinyapps.io/sourceattribution/)  
+[Data Dashboard (Shiny Web App)](https://cuanschutz-em.shinyapps.io/normoxia/)  
 
 
