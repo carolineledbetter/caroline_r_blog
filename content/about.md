@@ -19,7 +19,7 @@ R enthusiast and reproducible research evangelist.
 :mortar_board: BA Biochemistry, University of Colorado  
 
 # Cool R Stuff
-[CIDAtools (R package)](www.github.com/ledbettc/CIDAtools/)  
+[CIDAtools (R package)](https://www.github.com/ledbettc/CIDAtools/)  
 [Food Source Attribution (Shiny Web App)](https://coe-foodsafetytools.shinyapps.io/sourceattribution/)  
 [Data Dashboard (Shiny Web App)](https://cuanschutz-em.shinyapps.io/normoxia/)  
 
