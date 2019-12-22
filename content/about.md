@@ -10,4 +10,11 @@ R enthusiast and reproducible research evangelist.
 
 [Github](https://github.com/ledbettc/) | 
 [Twitter](https://twitter.com/C_line_sealion) | 
-[Email](mailto:carolineledbetter@yahoo.com) 
+[Email](mailto:carolineledbetter@yahoo.com)  
+
+# Education  
+- :(mortarboard): MPH Biostatistics and Epidemiology, Colorado School of Public Health, 
+University of Colorado  
+- :(mortarboard): BA Biochemistry, University of Colorado  
+
+
