@@ -18,7 +18,7 @@ nearly every instance where I use `rowwise()` could be replaced by
 `group_by(id_column)`. For someone who always found the `apply` family fairly 
 straightforward and intuitive - I must confess, I've struggled more with the
 `purrr::map` family. They do however have a number of advantages over the 
-`apply` family - namily unified syntex and the ability to specify the output 
+`apply` family - namely unified syntax and the ability to specify the output 
 type. I also really like the ability to bind data frame 
 rows with a column for the source (`map_dfr(..., .id = 'source')`). This post 
 is my attempt to think through some of the ways I can use `pmap` and 

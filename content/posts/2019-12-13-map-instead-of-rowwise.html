@@ -20,7 +20,7 @@ nearly every instance where I use <code>rowwise()</code> could be replaced by
 <code>group_by(id_column)</code>. For someone who always found the <code>apply</code> family fairly
 straightforward and intuitive - I must confess, I’ve struggled more with the
 <code>purrr::map</code> family. They do however have a number of advantages over the
-<code>apply</code> family - namily unified syntex and the ability to specify the output
+<code>apply</code> family - namely unified syntax and the ability to specify the output
 type. I also really like the ability to bind data frame
 rows with a column for the source (<code>map_dfr(..., .id = 'source')</code>). This post
 is my attempt to think through some of the ways I can use <code>pmap</code> and
