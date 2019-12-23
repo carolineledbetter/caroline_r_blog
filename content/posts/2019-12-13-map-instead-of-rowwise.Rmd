@@ -99,7 +99,9 @@ dat %>%
         chr_vars = c(chr_1, chr_2, chr_3)) %>% 
    mutate(sum = map_int(int_vars, sum), 
           all_t = map_lgl(lgl_vars, function(x) all(unlist(x))), 
-          any_b = map_lgl(chr_vars, function(x) {any(map_lgl(x, ~. == 'B'))}), 
+          any_b = map_lgl(chr_vars, function(x) {
+            any(map_lgl(x, ~. == 'B'))
+            }), 
           any_c = map_lgl(chr_vars, function(x) any(unlist(x) == 'C')), 
           any_a = map_lgl(chr_vars, function(x) any(unlist(x) == 'A'))
           ) %>% 
@@ -136,4 +138,4 @@ dat %>%
 
 Finally, don't forget to ungroup! 
 ![If you bring group_by() to the party, don't forget dplyr::ungroup()](../../../images/group_by_ungroup.png)
-"Artwork by [@allison_horst](https://github.com/allisonhorst/stats-illustrations"
+"Artwork by [@allison_horst](https://github.com/allisonhorst/stats-illustrations)"

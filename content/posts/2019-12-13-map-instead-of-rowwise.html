@@ -118,7 +118,9 @@ of the <code>tidyselect::select_helpers</code> to group our variables.</p>
         chr_vars = c(chr_1, chr_2, chr_3)) %&gt;% 
    mutate(sum = map_int(int_vars, sum), 
           all_t = map_lgl(lgl_vars, function(x) all(unlist(x))), 
-          any_b = map_lgl(chr_vars, function(x) {any(map_lgl(x, ~. == &#39;B&#39;))}), 
+          any_b = map_lgl(chr_vars, function(x) {
+            any(map_lgl(x, ~. == &#39;B&#39;))
+            }), 
           any_c = map_lgl(chr_vars, function(x) any(unlist(x) == &#39;C&#39;)), 
           any_a = map_lgl(chr_vars, function(x) any(unlist(x) == &#39;A&#39;))
           ) %&gt;% 
@@ -169,5 +171,5 @@ challenging if we want to do more than one “summary”.</p>
 ## 10    10     5     9     5</code></pre>
 <p>Finally, don’t forget to ungroup!
 <img src="../../../images/group_by_ungroup.png" alt="If you bring group_by() to the party, don’t forget dplyr::ungroup()" />
-“Artwork by <span class="citation">[@allison_horst]</span>(<a href="https://github.com/allisonhorst/stats-illustrations" class="uri">https://github.com/allisonhorst/stats-illustrations</a>”</p>
+“Artwork by <span class="citation">[@allison_horst]</span>(<a href="https://github.com/allisonhorst/stats-illustrations" class="uri">https://github.com/allisonhorst/stats-illustrations</a>)”</p>
 </div>
