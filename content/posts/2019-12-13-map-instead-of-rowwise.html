@@ -55,7 +55,7 @@ dat &lt;- tibble(!!!c(id = list(1:10),
 ##  8     8     2     3     6 FALSE TRUE  FALSE C     C     B    
 ##  9     9     9     5     8 TRUE  FALSE TRUE  C     C     C    
 ## 10    10     5     9     5 FALSE FALSE FALSE C     C     B</code></pre>
-<p><strong>use pmap</strong>
+<p><strong>use pmap</strong><br />
 <code>pmap</code> seems to be what I want when I really don’t have a grouping variable,
 I want to do something rowwise even if I have multiple observations (lines)
 per id and/or I really want a vector output. <code>pmap</code> takes the column names as
@@ -171,5 +171,5 @@ challenging if we want to do more than one “summary”.</p>
 ## 10    10     5     9     5</code></pre>
 <p>Finally, don’t forget to ungroup!
 <img src="../../../images/group_by_ungroup.png" alt="If you bring group_by() to the party, don’t forget dplyr::ungroup()" />
-“Artwork by <span class="citation">[@allison_horst]</span>(<a href="https://github.com/allisonhorst/stats-illustrations" class="uri">https://github.com/allisonhorst/stats-illustrations</a>)”</p>
+“Artwork by <a href="https://github.com/allisonhorst/stats-illustrations">‘<span class="citation">@allison_horst</span>’</a>”</p>
 </div>

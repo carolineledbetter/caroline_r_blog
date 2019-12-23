@@ -51,7 +51,7 @@ dat <- tibble(!!!c(id = list(1:10),
 dat
 ```
 
-**use pmap**
+**use pmap**  
 `pmap` seems to be what I want when I really don't have a grouping variable, 
 I want to do something rowwise even if I have multiple observations (lines) 
 per id and/or I really want a vector output. `pmap` takes the column names as
@@ -138,4 +138,4 @@ dat %>%
 
 Finally, don't forget to ungroup! 
 ![If you bring group_by() to the party, don't forget dplyr::ungroup()](../../../images/group_by_ungroup.png)
-"Artwork by [@allison_horst](https://github.com/allisonhorst/stats-illustrations)"
+"Artwork by ['@allison_horst'](https://github.com/allisonhorst/stats-illustrations)"
