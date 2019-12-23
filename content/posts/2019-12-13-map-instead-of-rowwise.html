@@ -35,8 +35,10 @@ value or numeric manipulation (sum, min, etc.).</p>
 <pre class="r"><code>set.seed(1313)
 dat &lt;- tibble(!!!c(id = list(1:10), 
   int_ = replicate(3, sample.int(10), simplify = F), 
-  lgl_ = replicate(3, sample(c(T, F), 10, replace = T), simplify = F), 
-  chr_ = replicate(3, sample(c(&quot;A&quot;, &quot;B&quot;, &quot;C&quot;), 10, replace = T), simplify = F)
+  lgl_ = replicate(3, sample(c(T, F), 10, replace = T), 
+                   simplify = F), 
+  chr_ = replicate(3, sample(c(&quot;A&quot;, &quot;B&quot;, &quot;C&quot;), 10, replace = T), 
+                   simplify = F)
 ), .name_repair = &#39;universal&#39;) %&gt;% 
   rename_all(str_remove_all, pattern = &#39;\\.&#39;)</code></pre>
 <pre class="r"><code>dat</code></pre>
@@ -53,9 +55,8 @@ dat &lt;- tibble(!!!c(id = list(1:10),
 ##  8     8     2     3     6 FALSE TRUE  FALSE C     C     B    
 ##  9     9     9     5     8 TRUE  FALSE TRUE  C     C     C    
 ## 10    10     5     9     5 FALSE FALSE FALSE C     C     B</code></pre>
-<div id="use-pmap" class="section level2">
-<h2>use pmap</h2>
-<p><code>pmap</code> seems to be what I want when I really don’t have a grouping variable,
+<p><strong>use pmap</strong>
+<code>pmap</code> seems to be what I want when I really don’t have a grouping variable,
 I want to do something rowwise even if I have multiple observations (lines)
 per id and/or I really want a vector output. <code>pmap</code> takes the column names as
 the names of the arguments.</p>
@@ -63,7 +64,7 @@ the names of the arguments.</p>
   select(starts_with(&#39;lgl&#39;)) %&gt;% 
   pmap_lgl(all)</code></pre>
 <pre><code>##  [1] FALSE FALSE FALSE FALSE FALSE FALSE FALSE FALSE FALSE FALSE</code></pre>
-<p>In the above example for the first row pmap would correspond to:
+<p>In the above example for the first row pmap would correspond to:<br />
 <code>all(lgl_1 = TRUE, lgl_2 = TRUE, lgl_3 = FALSE)</code> and thus it returns
 <code>FALSE</code>.</p>
 <p>It can be combined with <code>bind_cols</code> to append the vector as new column.</p>
@@ -107,9 +108,9 @@ the names of the arguments.</p>
   select(starts_with(&#39;lgl&#39;)) %&gt;% 
   pmap_lgl(any)</code></pre>
 <pre><code>##  [1]  TRUE  TRUE  TRUE  TRUE  TRUE FALSE  TRUE  TRUE  TRUE FALSE</code></pre>
-</div>
-<div id="use-nest-and-rowwise" class="section level2">
-<h2>use nest and rowwise</h2>
+<p><strong>use nest and rowwise</strong><br />
+The below examples group_by(id) and use <code>map</code>. This allows us to take advantage
+of the <code>tidyselect::select_helpers</code> to group our variables.</p>
 <pre class="r"><code>dat %&gt;%
   group_by(id) %&gt;%
    nest(int_vars = starts_with(&#39;int&#39;), 
@@ -121,9 +122,9 @@ the names of the arguments.</p>
           any_c = map_lgl(chr_vars, function(x) any(unlist(x) == &#39;C&#39;)), 
           any_a = map_lgl(chr_vars, function(x) any(unlist(x) == &#39;A&#39;))
           ) %&gt;% 
-  unnest(cols = c(int_vars, lgl_vars, chr_vars))</code></pre>
+  unnest(cols = c(int_vars, lgl_vars, chr_vars)) %&gt;% 
+  ungroup()</code></pre>
 <pre><code>## # A tibble: 10 x 15
-## # Groups:   id [10]
 ##       id int_1 int_2 int_3 lgl_1 lgl_2 lgl_3 chr_1 chr_2 chr_3   sum all_t any_b
 ##    &lt;int&gt; &lt;int&gt; &lt;int&gt; &lt;int&gt; &lt;lgl&gt; &lt;lgl&gt; &lt;lgl&gt; &lt;chr&gt; &lt;chr&gt; &lt;chr&gt; &lt;int&gt; &lt;lgl&gt; &lt;lgl&gt;
 ##  1     1     3     6     9 FALSE TRUE  TRUE  B     B     C        18 FALSE TRUE 
@@ -137,9 +138,19 @@ the names of the arguments.</p>
 ##  9     9     9     5     8 TRUE  FALSE TRUE  C     C     C        22 FALSE FALSE
 ## 10    10     5     9     5 FALSE FALSE FALSE C     C     B        19 FALSE TRUE 
 ## # … with 2 more variables: any_c &lt;lgl&gt;, any_a &lt;lgl&gt;</code></pre>
-</div>
-<div id="vs-summarize" class="section level2">
-<h2>vs summarize</h2>
+<pre class="r"><code>dat %&gt;% 
+  group_by(id) %&gt;% 
+  mutate(sum = sum(starts_with(&#39;int&#39;)))</code></pre>
+<pre><code>## Error: No tidyselect variables were registered</code></pre>
+<pre class="r"><code>dat %&gt;% 
+  group_by(id) %&gt;% 
+  mutate(sum = sum(select(starts_with(&#39;int&#39;))))</code></pre>
+<pre><code>## Error: No tidyselect variables were registered</code></pre>
+<p>We can them use
+<code>unnest</code> to return our variables.</p>
+<p><strong>vs summarise</strong><br />
+Lastly we can always use <code>group_by</code> and <code>summarise</code> but this becomes
+challenging if we want to do more than one “summary”.</p>
 <pre class="r"><code>dat %&gt;% 
   group_by(id) %&gt;% 
   summarise_if(is.numeric, sum)</code></pre>
@@ -156,5 +167,7 @@ the names of the arguments.</p>
 ##  8     8     2     3     6
 ##  9     9     9     5     8
 ## 10    10     5     9     5</code></pre>
-</div>
+<p>Finally, don’t forget to ungroup!
+<img src="../../../images/group_by_ungroup.png" alt="If you bring group_by() to the party, don’t forget dplyr::ungroup()" />
+“Artwork by <span class="citation">@allison_horst</span>”</p>
 </div>

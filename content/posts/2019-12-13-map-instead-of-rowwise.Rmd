@@ -38,8 +38,10 @@ library(tidyverse)
 set.seed(1313)
 dat <- tibble(!!!c(id = list(1:10), 
   int_ = replicate(3, sample.int(10), simplify = F), 
-  lgl_ = replicate(3, sample(c(T, F), 10, replace = T), simplify = F), 
-  chr_ = replicate(3, sample(c("A", "B", "C"), 10, replace = T), simplify = F)
+  lgl_ = replicate(3, sample(c(T, F), 10, replace = T), 
+                   simplify = F), 
+  chr_ = replicate(3, sample(c("A", "B", "C"), 10, replace = T), 
+                   simplify = F)
 ), .name_repair = 'universal') %>% 
   rename_all(str_remove_all, pattern = '\\.')
 
@@ -49,7 +51,7 @@ dat <- tibble(!!!c(id = list(1:10),
 dat
 ```
 
-## use pmap  
+**use pmap**
 `pmap` seems to be what I want when I really don't have a grouping variable, 
 I want to do something rowwise even if I have multiple observations (lines) 
 per id and/or I really want a vector output. `pmap` takes the column names as
@@ -61,7 +63,7 @@ dat %>%
   pmap_lgl(all)
 ```
  
-In the above example for the first row pmap would correspond to:
+In the above example for the first row pmap would correspond to:  
 `all(lgl_1 = TRUE, lgl_2 = TRUE, lgl_3 = FALSE)` and thus it returns 
 `FALSE`. 
 
@@ -86,8 +88,9 @@ dat %>%
 
 ```
 
-## use nest and rowwise
-
+**use nest and rowwise**  
+The below examples group_by(id) and use `map`. This allows us to take advantage
+of the `tidyselect::select_helpers` to group our variables.
 ```{r}
 dat %>%
   group_by(id) %>%
@@ -100,10 +103,30 @@ dat %>%
           any_c = map_lgl(chr_vars, function(x) any(unlist(x) == 'C')), 
           any_a = map_lgl(chr_vars, function(x) any(unlist(x) == 'A'))
           ) %>% 
-  unnest(cols = c(int_vars, lgl_vars, chr_vars))
+  unnest(cols = c(int_vars, lgl_vars, chr_vars)) %>% 
+  ungroup()
 ```
 
-## vs summarize
+```{r, error = TRUE}
+dat %>% 
+  group_by(id) %>% 
+  mutate(sum = sum(starts_with('int')))
+```
+
+```{r, error = TRUE}
+dat %>% 
+  group_by(id) %>% 
+  mutate(sum = sum(select(starts_with('int'))))
+```
+
+We can them use
+`unnest` to return our variables. 
+
+
+**vs summarise**  
+Lastly we can always use `group_by` and `summarise` but this becomes 
+challenging if we want to do more than one "summary". 
+
 ```{r}
 
 dat %>% 
@@ -111,4 +134,6 @@ dat %>%
   summarise_if(is.numeric, sum)
 ```
 
-
+Finally, don't forget to ungroup! 
+![If you bring group_by() to the party, don't forget dplyr::ungroup()](../../../images/group_by_ungroup.png)
+"Artwork by @allison_horst"
