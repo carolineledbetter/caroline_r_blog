@@ -3,6 +3,7 @@ title: map instead of rowwise
 author: Caroline Ledbetter
 date: '2019-12-13'
 slug: map-instead-of-rowwise
+comment: true
 categories:
   - R
 tags:
@@ -139,3 +140,5 @@ dat %>%
 Finally, don't forget to ungroup! 
 ![If you bring group_by() to the party, don't forget dplyr::ungroup()](../../../images/group_by_ungroup.png)
 "Artwork by ['@allison_horst'](https://github.com/allisonhorst/stats-illustrations)"
+
+
