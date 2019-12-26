@@ -75,7 +75,7 @@ staticDir = ["static", "../assets/others"]               # static directories
   avatar = "images/sealion.png"                           # URL of avatar shown in home page
   subtitle = "lessons learned along the way"  # subtitle shown in home page
 
-  socialShare = false                                     # whether to show social share links in post page
+  socialShare = true                                     # whether to show social share links in post page
 
                                                       #### Footer CopyRight Info
   since = 2019                                           # Site creation time
@@ -176,7 +176,7 @@ staticDir = ["static", "../assets/others"]               # static directories
     #Thingiverse = "xxxx"
 
   [params.share]                                         # Social Share Links in post page
-    enable = false
+    enable = true
     Twitter = true
     Facebook = true
     Reddit = true
