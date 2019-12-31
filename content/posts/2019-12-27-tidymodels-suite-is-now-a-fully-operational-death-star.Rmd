@@ -1,0 +1,70 @@
+---
+title: Tidymodels suite is now “a fully operational death star”
+author: Caroline Ledbetter
+date: '2019-12-27'
+publishDate: '2020-01-31'
+slug: tidymodels-suite-demo
+categories:
+  - R
+tags:
+  - tidyverse
+  - tidymodels
+lastmod: '2019-12-27T17:14:17-07:00'
+description: ''
+show_in_homepage: yes
+show_description: ''
+license: ''
+featured_image: ''
+featured_image_preview: ''
+comment: yes
+math: no
+---
+
+```{r echo=FALSE}
+blogdown::shortcode('tweet', '1204918320346157056')
+```
+
+I have been trying to incorporate more of the `tidymodels` suite of packages 
+into my predictive models workflow (`rsample`, `recipes`) but I find myself 
+frequently falling back on `caret` for model tuning and fitting 
+because it's what I know. This post is a workthrough from start to finish using 
+the `tidymodels` suite. This post is NOT a tutorial for supervised learning. 
+It assumes you know how and why to split your data, resample, up/down sample 
+tune parameters, evaluate models etc. 
+If you are looking for guides for machine learning, I highly recommend:  
+:star: 
+[Learning to teach machines to learn:](https://alison.rbind.io/post/2019-12-23-learning-to-teach-machines-to-learn/) 
+This post from Alison Hill is full of great resources.  
+:closed_book:[Applied Predictive Modeling](http://appliedpredictivemodeling.com) 
+by Max Kuhn and Kjell Johnson  
+:closed_book:
+[Intro to Statisitcal Learning](https://www.springer.com/gp/book/9781461471370)
+by Gareth James, Daniela Witten, Trevor Hastie and Robert Tibshirani  
+:closed_book:
+[The Elements of Statistical Learning](https://www.springer.com/gp/book/9780387848570)
+by Trevor Hastie, Robert Tibshirani and Jerome Friedman  
+
+**The Data**  
+For this post I am going to use the 
+[German Credit data](http://archive.ics.uci.edu/ml/datasets/Statlog+(German+Credit+Data)) 
+from the University of California Irving Machine Learning Repository. If you 
+have the `caret` package installed, it is included. 
+
+```{r, message = FALSE}
+library(tidymodels)
+data(GermanCredit, package = "caret")
+GermanCredit %>% glimpse(width = 65)
+```
+
+For clairty I am going to convert the dummy variables to factors (I also think
+this is a more accurate representation of what your real data are likely to 
+look like) using pivot_longer.
+
+```{r}
+
+
+
+
+
+```
+
