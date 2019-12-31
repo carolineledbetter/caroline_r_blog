@@ -12,7 +12,7 @@ googleAnalytics = ""                                     # [UA-XXXXXXXX-X] googl
 disqusShortname = "carolineledbetter-us"                             # Disqus shortname to use Disqus in posts
 copyright = "This work is licensed under a Creative Commons Attribution-NonCommercial 4.0 International License."
                                                          # copyright description used only for seo schema
-ignoreFiles = ["\\.Rmd$", "\\.Rmarkdown$", "_files$", "_cache$"]
+ignoreFiles = ["\\.Rmd$", "\\.Rmarkdown$", "_files$", "_cache$", "\\.R"]
                                                       #### Syntax Highlighting (https://gohugo.io/content-management/syntax-highlighting)
 pygmentsOptions = "linenos=table"
 pygmentsCodefences = true
@@ -191,14 +191,14 @@ staticDir = ["static", "../assets/others"]               # static directories
   [params.publisher]                                     # Publisher Info just for SEO
     name = "Caroline Ledbetter"
     [params.publisher.logo]
-      #url = "logo.png"
-      #width = 127
-      #height = 40
+      url = "logo.png"
+      width = 127
+      height = 40
 
   [params.logo]                                          # Website Log Info just for SEO
-    #url = "logo.png"
-    #width = 127
-    #height = 40
+    url = "logo.png"
+    width = 127
+    height = 40
 
   [params.image]                                         # Website Image Info just for SEO
     #url = "cover.png"
