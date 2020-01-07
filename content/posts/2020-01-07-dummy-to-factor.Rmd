@@ -76,14 +76,14 @@ this
 
 ```{r}
 fct_dummy <- function(data, 
-                            variables = tidyselect::everything(), 
-                            sep = '.') {
+                      variables = tidyselect::everything(), 
+                      sep = '.') {
   variables <- rlang::enquo(variables)
   # transform to long format the dummy columns
   tmp <- 
     tidyr::pivot_longer(data, 
                         cols = intersect(tidyselect::contains(sep),  
-                                           !!variables),
+                                         !!variables),
                         names_to = c("groups", "levels"),
                         names_pattern = paste0("^([^'", sep, "]*)[", 
                                                sep, "](.*)"))
@@ -133,7 +133,7 @@ glimpse(new_dat)
 You can also use the variables argument to only convert certain variables. 
 ```{r}
 dat <- rename_all(GermanCredit, str_replace, 
-                         pattern = '[.]', replacement = '_')
+                  pattern = '[.]', replacement = '_')
 glimpse(fct_dummy(dat, variables = starts_with('P'), sep = '_'))
 
 ```

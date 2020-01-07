@@ -90,14 +90,14 @@ this
 <a href="https://community.rstudio.com/t/convert-dummy-variables-to-factors/48356">Rstudio community post</a>
 .</p>
 <pre class="r"><code>fct_dummy &lt;- function(data, 
-                            variables = tidyselect::everything(), 
-                            sep = &#39;.&#39;) {
+                      variables = tidyselect::everything(), 
+                      sep = &#39;.&#39;) {
   variables &lt;- rlang::enquo(variables)
   # transform to long format the dummy columns
   tmp &lt;- 
     tidyr::pivot_longer(data, 
                         cols = intersect(tidyselect::contains(sep),  
-                                           !!variables),
+                                         !!variables),
                         names_to = c(&quot;groups&quot;, &quot;levels&quot;),
                         names_pattern = paste0(&quot;^([^&#39;&quot;, sep, &quot;]*)[&quot;, 
                                                sep, &quot;](.*)&quot;))
@@ -226,7 +226,7 @@ glimpse(new_dat)</code></pre>
 ## $ Job                       &lt;fct&gt; SkilledEmployee, SkilledEmployee, Unskilled…</code></pre>
 <p>You can also use the variables argument to only convert certain variables.</p>
 <pre class="r"><code>dat &lt;- rename_all(GermanCredit, str_replace, 
-                         pattern = &#39;[.]&#39;, replacement = &#39;_&#39;)
+                  pattern = &#39;[.]&#39;, replacement = &#39;_&#39;)
 glimpse(fct_dummy(dat, variables = starts_with(&#39;P&#39;), sep = &#39;_&#39;))</code></pre>
 <pre><code>## Observations: 1,000
 ## Variables: 45
