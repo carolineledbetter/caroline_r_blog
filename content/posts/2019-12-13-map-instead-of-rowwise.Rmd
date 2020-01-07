@@ -32,6 +32,15 @@ I've set up a data frame with integer, logical and character columns because
 most of what I use `rowwise` for is testing for conditions, the presence of a 
 value or numeric manipulation (sum, min, etc.).
 
+```{css, echo = FALSE}
+pre code, pre, code {
+  white-space: pre !important;
+  overflow-x: scroll !important;
+  word-break: keep-all !important;
+  word-wrap: initial !important;
+}
+```
+
 ```{r, message = F}
 library(tidyverse)
 ```
@@ -100,16 +109,19 @@ dat %>%
         lgl_vars = contains('lgl'), 
         chr_vars = c(chr_1, chr_2, chr_3)) %>% 
    mutate(sum = map_int(int_vars, sum), 
-          all_t = map_lgl(lgl_vars, function(x) all(unlist(x))), 
+          all_true = map_lgl(lgl_vars, pmap_lgl, all), 
           any_b = map_lgl(chr_vars, function(x) {
             any(map_lgl(x, ~. == 'B'))
             }), 
-          any_c = map_lgl(chr_vars, function(x) any(unlist(x) == 'C')), 
+          any_c = map_lgl(chr_vars, pmap_lgl, ~any(. == 'C')), 
           any_a = map_lgl(chr_vars, function(x) any(unlist(x) == 'A'))
           ) %>% 
   unnest(cols = c(int_vars, lgl_vars, chr_vars)) %>% 
   ungroup()
 ```
+
+We can them use
+`unnest` to return our variables. 
 
 ```{r, error = TRUE}
 dat %>% 
@@ -122,21 +134,17 @@ dat %>%
   group_by(id) %>% 
   mutate(sum = sum(select(starts_with('int'))))
 ```
-
-We can them use
-`unnest` to return our variables. 
-
-
-**vs summarise**  
-Lastly we can always use `group_by` and `summarise` but this becomes 
-challenging if we want to do more than one "summary". 
-
 ```{r}
-
-dat %>% 
-  group_by(id) %>% 
-  summarise_if(is.numeric, sum)
+## note as of the dev version of dplyr 0.8.99.9000 this no longer returns an
 ```
+```{r}
+## error but it sums the column positions and thus returns 9 (2 + 3 + 4). 
+```
+
+
+
+
+
 
 Finally, don't forget to ungroup! 
 ![If you bring group_by() to the party, don't forget dplyr::ungroup()](../../../images/group_by_ungroup.png)

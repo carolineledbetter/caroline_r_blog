@@ -33,6 +33,14 @@ nested columns with <code>map</code> in place of rowwise.</p>
 I’ve set up a data frame with integer, logical and character columns because
 most of what I use <code>rowwise</code> for is testing for conditions, the presence of a
 value or numeric manipulation (sum, min, etc.).</p>
+<style type="text/css">
+pre code, pre, code {
+  white-space: pre !important;
+  overflow-x: scroll !important;
+  word-break: keep-all !important;
+  word-wrap: initial !important;
+}
+</style>
 <pre class="r"><code>library(tidyverse)</code></pre>
 <pre class="r"><code>set.seed(1313)
 dat &lt;- tibble(!!!c(id = list(1:10), 
@@ -119,29 +127,31 @@ of the <code>tidyselect::select_helpers</code> to group our variables.</p>
         lgl_vars = contains(&#39;lgl&#39;), 
         chr_vars = c(chr_1, chr_2, chr_3)) %&gt;% 
    mutate(sum = map_int(int_vars, sum), 
-          all_t = map_lgl(lgl_vars, function(x) all(unlist(x))), 
+          all_true = map_lgl(lgl_vars, pmap_lgl, all), 
           any_b = map_lgl(chr_vars, function(x) {
             any(map_lgl(x, ~. == &#39;B&#39;))
             }), 
-          any_c = map_lgl(chr_vars, function(x) any(unlist(x) == &#39;C&#39;)), 
+          any_c = map_lgl(chr_vars, pmap_lgl, ~any(. == &#39;C&#39;)), 
           any_a = map_lgl(chr_vars, function(x) any(unlist(x) == &#39;A&#39;))
           ) %&gt;% 
   unnest(cols = c(int_vars, lgl_vars, chr_vars)) %&gt;% 
   ungroup()</code></pre>
 <pre><code>## # A tibble: 10 x 15
-##       id int_1 int_2 int_3 lgl_1 lgl_2 lgl_3 chr_1 chr_2 chr_3   sum all_t any_b
-##    &lt;int&gt; &lt;int&gt; &lt;int&gt; &lt;int&gt; &lt;lgl&gt; &lt;lgl&gt; &lt;lgl&gt; &lt;chr&gt; &lt;chr&gt; &lt;chr&gt; &lt;int&gt; &lt;lgl&gt; &lt;lgl&gt;
-##  1     1     3     6     9 FALSE TRUE  TRUE  B     B     C        18 FALSE TRUE 
-##  2     2     6    10     3 FALSE TRUE  TRUE  A     A     B        19 FALSE TRUE 
-##  3     3    10     2     7 FALSE FALSE TRUE  B     A     C        19 FALSE TRUE 
-##  4     4     1     4     2 FALSE TRUE  TRUE  C     C     A         7 FALSE FALSE
-##  5     5     4     1     1 FALSE FALSE TRUE  A     C     B         6 FALSE TRUE 
-##  6     6     7     7    10 FALSE FALSE FALSE B     C     B        24 FALSE TRUE 
-##  7     7     8     8     4 TRUE  TRUE  FALSE C     C     A        20 FALSE FALSE
-##  8     8     2     3     6 FALSE TRUE  FALSE C     C     B        11 FALSE TRUE 
-##  9     9     9     5     8 TRUE  FALSE TRUE  C     C     C        22 FALSE FALSE
-## 10    10     5     9     5 FALSE FALSE FALSE C     C     B        19 FALSE TRUE 
-## # … with 2 more variables: any_c &lt;lgl&gt;, any_a &lt;lgl&gt;</code></pre>
+##       id int_1 int_2 int_3 lgl_1 lgl_2 lgl_3 chr_1 chr_2 chr_3   sum all_true
+##    &lt;int&gt; &lt;int&gt; &lt;int&gt; &lt;int&gt; &lt;lgl&gt; &lt;lgl&gt; &lt;lgl&gt; &lt;chr&gt; &lt;chr&gt; &lt;chr&gt; &lt;int&gt; &lt;lgl&gt;   
+##  1     1     3     6     9 FALSE TRUE  TRUE  B     B     C        18 FALSE   
+##  2     2     6    10     3 FALSE TRUE  TRUE  A     A     B        19 FALSE   
+##  3     3    10     2     7 FALSE FALSE TRUE  B     A     C        19 FALSE   
+##  4     4     1     4     2 FALSE TRUE  TRUE  C     C     A         7 FALSE   
+##  5     5     4     1     1 FALSE FALSE TRUE  A     C     B         6 FALSE   
+##  6     6     7     7    10 FALSE FALSE FALSE B     C     B        24 FALSE   
+##  7     7     8     8     4 TRUE  TRUE  FALSE C     C     A        20 FALSE   
+##  8     8     2     3     6 FALSE TRUE  FALSE C     C     B        11 FALSE   
+##  9     9     9     5     8 TRUE  FALSE TRUE  C     C     C        22 FALSE   
+## 10    10     5     9     5 FALSE FALSE FALSE C     C     B        19 FALSE   
+## # … with 3 more variables: any_b &lt;lgl&gt;, any_c &lt;lgl&gt;, any_a &lt;lgl&gt;</code></pre>
+<p>We can them use
+<code>unnest</code> to return our variables.</p>
 <pre class="r"><code>dat %&gt;% 
   group_by(id) %&gt;% 
   mutate(sum = sum(starts_with(&#39;int&#39;)))</code></pre>
@@ -150,27 +160,8 @@ of the <code>tidyselect::select_helpers</code> to group our variables.</p>
   group_by(id) %&gt;% 
   mutate(sum = sum(select(starts_with(&#39;int&#39;))))</code></pre>
 <pre><code>## Error: No tidyselect variables were registered</code></pre>
-<p>We can them use
-<code>unnest</code> to return our variables.</p>
-<p><strong>vs summarise</strong><br />
-Lastly we can always use <code>group_by</code> and <code>summarise</code> but this becomes
-challenging if we want to do more than one “summary”.</p>
-<pre class="r"><code>dat %&gt;% 
-  group_by(id) %&gt;% 
-  summarise_if(is.numeric, sum)</code></pre>
-<pre><code>## # A tibble: 10 x 4
-##       id int_1 int_2 int_3
-##    &lt;int&gt; &lt;int&gt; &lt;int&gt; &lt;int&gt;
-##  1     1     3     6     9
-##  2     2     6    10     3
-##  3     3    10     2     7
-##  4     4     1     4     2
-##  5     5     4     1     1
-##  6     6     7     7    10
-##  7     7     8     8     4
-##  8     8     2     3     6
-##  9     9     9     5     8
-## 10    10     5     9     5</code></pre>
+<pre class="r"><code>## note as of the dev version of dplyr 0.8.99.9000 this no longer returns an</code></pre>
+<pre class="r"><code>## error but it sums the column positions and thus returns 9 (2 + 3 + 4). </code></pre>
 <p>Finally, don’t forget to ungroup!
 <img src="../../../images/group_by_ungroup.png" alt="If you bring group_by() to the party, don’t forget dplyr::ungroup()" />
 “Artwork by <a href="https://github.com/allisonhorst/stats-illustrations">‘<span class="citation">@allison_horst</span>’</a>”</p>
