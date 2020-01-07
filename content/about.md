@@ -8,9 +8,9 @@ Currently a collaborative biostatistician at the
 [Colorado School of Public Health](http://www.ucdenver.edu/academics/colleges/PublicHealth/Academics/departments/Biostatistics/Pages/welcome.aspx). 
 R enthusiast and reproducible research evangelist.   
 
-[Github](https://github.com/ledbettc/) | 
-[Twitter](https://twitter.com/C_line_sealion) | 
-[Email](mailto:carolineledbetter@yahoo.com)  
+[Github: ledbettc](https://github.com/ledbettc/) | 
+[Twitter: @C_line_sealion](https://twitter.com/C_line_sealion) | 
+[Email: carolineledbetter@yahoo.com](mailto:carolineledbetter@yahoo.com)  
 
 # Education  
 :mortar_board: MPH Biostatistics and Epidemiology, 
