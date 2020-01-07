@@ -130,13 +130,6 @@ glimpse(new_dat)
 
 ```
 
-You can also use the variables argument to only convert certain variables. 
-```{r}
-dat <- rename_all(GermanCredit, str_replace, 
-                  pattern = '[.]', replacement = '_')
-glimpse(fct_dummy(dat, variables = starts_with('P'), sep = '_'))
-
-```
 
 It is now straightforward to look at groupings of factors. 
 
@@ -161,6 +154,15 @@ new_dat <- fct_dummy(GermanCredit)
 new_dat %>% 
   count(Housing, CheckingAccountStatus)
 ```
+
+You can also use the variables argument to only convert certain variables. 
+```{r}
+dat <- rename_all(GermanCredit, str_replace, 
+                  pattern = '[.]', replacement = '_')
+glimpse(fct_dummy(dat, variables = starts_with('P'), sep = '_'))
+
+```
+
 
 I have not yet decided what to do with this function, if I want to put it in 
 one of my own packages or try and add it to another package. Please feel free 
