@@ -1,0 +1,173 @@
+---
+title: Dummy to Factor
+author: Caroline Ledbetter
+date: '2020-01-07'
+slug: dummy-to-factor
+categories:
+  - R
+tags:
+  - tidyverse
+lastmod: '2020-01-07T12:44:44-07:00'
+description: 'Converting Dummy Variables to Factors'
+show_in_homepage: yes
+show_description: yes
+license: ''
+featured_image: ''
+featured_image_preview: ''
+comment: yes
+math: no
+---
+
+```{css, echo = FALSE}
+pre code, pre, code {
+  white-space: pre !important;
+  overflow-x: scroll !important;
+  word-break: keep-all !important;
+  word-wrap: initial !important;
+}
+```
+
+**Motivation**  
+I often have raw data where a variable has been provided as dummy variables 
+as opposed to a character/factor variable. For example `job_employed = 1`, 
+`job_unemployed = 0` instead of `job = employed`. While some modeling 
+algorithms require the use of dummy variables, this can make it challenging 
+to detect missing/multiple data and to create tables. For example in the German 
+Credit Data[^1], if you want a count of the *purpose of the loan* field, 
+you first
+have to `sum` and then `pivot_longer` and it doesn't tell you if any 
+observation
+has no values true or multiple values true.
+
+```{r, message = FALSE}
+library(tidyverse)
+data(GermanCredit, package = "caret")
+GermanCredit %>% summarise_at(vars(starts_with('Purpose')), sum)
+GermanCredit %>% 
+  summarise_at(vars(starts_with('Purpose')), sum) %>% 
+  pivot_longer(cols = everything(), 
+               names_to = 'Purpose', 
+               values_to = 'count', 
+               names_pattern = '^[^.]+[.](.*)')
+```
+
+Now, what if you want to look at *checking account status* vs 
+*housing status*. This 
+is very difficult/tedious to do without converting to factors. 
+
+```{r}
+GermanCredit %>% 
+  summarise(Lt0_and_Rent = sum(CheckingAccountStatus.lt.0 & Housing.Rent), 
+            `0to200_and_Rent` = sum(CheckingAccountStatus.0.to.200 & 
+                                      Housing.Rent))
+# et cetera.
+
+```
+
+To that end I have created a function to convert dummy variables to factors. 
+It requires that your variables have a seperator so that it can detect the 
+main variable name from the level. 
+My original function was quite slow and I appreciated the extremely valuable
+help provided by 
+[Christophe Dervieux](https://community.rstudio.com/u/cderv/summary) via 
+this 
+[Rstudio community post](https://community.rstudio.com/t/convert-dummy-variables-to-factors/48356)
+.
+
+```{r}
+fct_dummy <- function(data, 
+                            variables = tidyselect::everything(), 
+                            sep = '.') {
+  variables <- rlang::enquo(variables)
+  # transform to long format the dummy columns
+  tmp <- 
+    tidyr::pivot_longer(data, 
+                        cols = intersect(tidyselect::contains(sep),  
+                                           !!variables),
+                        names_to = c("groups", "levels"),
+                        names_pattern = paste0("^([^'", sep, "]*)[", 
+                                               sep, "](.*)"))
+  
+  # get the groups name for column selection after
+  groups <- unique(tmp$groups)
+  
+  
+  # keep only non dummy value and do not keep temp value col
+  tmp <- dplyr::select(
+    dplyr::filter(tmp, value == 1),
+    -value)
+  
+  # function to return 'multiple' if more than 1 value is present
+  ret_multiple <- function(x){
+    if(length(x) > 1) return('multiple')
+    return(x)
+  }
+  
+  
+  # tranform to wide format   
+  tmp <- tidyr::pivot_wider(
+    tmp,
+    names_from = groups, 
+    values_from = levels, 
+    values_fn = list(levels = ret_multiple))
+  
+  
+  # convert to factors the groups column
+  dplyr::mutate_at(
+    tmp,
+    groups,
+    ~ forcats::as_factor(.)
+  )
+}
+```
+
+
+Here is the original German Credit data and the converted tibble. 
+```{r} 
+glimpse(GermanCredit)
+new_dat <- fct_dummy(GermanCredit)
+glimpse(new_dat)
+
+```
+
+You can also use the variables argument to only convert certain variables. 
+```{r}
+dat <- rename_all(GermanCredit, str_replace, 
+                         pattern = '[.]', replacement = '_')
+glimpse(fct_dummy(dat, variables = starts_with('P'), sep = '_'))
+
+```
+
+It is now straightforward to look at groupings of factors. 
+
+```{r}
+new_dat %>% 
+  count(Housing, CheckingAccountStatus)
+```
+
+We can also see if we have multiples or missing data points
+```{r}
+GermanCredit[1, 13]
+GermanCredit[1, 13] <- 1
+```
+
+```{r}
+GermanCredit[1, 57] 
+GermanCredit[1, 57] <- 0
+```
+
+```{r}
+new_dat <- fct_dummy(GermanCredit)
+new_dat %>% 
+  count(Housing, CheckingAccountStatus)
+```
+
+I have not yet decided what to do with this function, if I want to put it in 
+one of my own packages or try and add it to another package. Please feel free 
+to use it you find it useful. 
+
+
+[^1]: This post uses the 
+[German Credit data](http://archive.ics.uci.edu/ml/datasets/Statlog+(German+Credit+Data)) 
+from the University of California Irving Machine Learning Repository. If you 
+have the `caret` package installed, it is included. 
