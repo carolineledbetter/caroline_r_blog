@@ -30,7 +30,7 @@ staticDir = ["static", "../assets/others"]               # static directories
   priority = 0.5
 
 [Permalinks]                                          #### Permalinks Info (https://gohugo.io/content-management/urls/#permalinks)
-  posts = ":year/:month/:filename"
+  posts = ":year/:month/:slug/"
 
 [menu]                                                #### Menu Info
   [[menu.main]]
