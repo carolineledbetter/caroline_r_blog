@@ -56,9 +56,7 @@ data(GermanCredit, package = "caret")
 GermanCredit %>% glimpse(width = 65)
 ```
 
-For clairty I am going to convert the dummy variables to factors (I also think
-this is a more accurate representation of what your real data are likely to 
-look like) using pivot_longer.
+
 
 ```{r}
 
