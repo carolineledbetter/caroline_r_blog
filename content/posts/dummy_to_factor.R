@@ -1,60 +1,55 @@
+data(GermanCredit, package = "caret")
 tibble::glimpse(GermanCredit)
-dummy_to_factor <- function(data, 
-                            variables = everything(), 
+fct_dummy <- function(data, 
+                            variables = tidyselect::everything(), 
                             sep = '.') {
   variables <- rlang::enquo(variables)
-  # get the variables names for included variables  
-  data_names <- names(dplyr::select(data, !!variables))
+  # transform to long format the dummy columns
+  tmp <- 
+    tidyr::pivot_longer(data, 
+                        cols = intersect(tidyselect::contains(sep),  
+                                           !!variables),
+                        names_to = c("groups", "levels"),
+                        names_pattern = paste0("^([^'", sep, "]*)[", 
+                                               sep, "](.*)"))
   
-  # create a names list that can be used in nest with the group and
-  # the variables that are in that group
-  groups <- 
-    dplyr::tibble(var_names = 
-                    data_names[dplyr::contains(sep, vars = data_names)])
-  if(!all(dplyr::select(data, groups$var_names) == 0 |
-          dplyr::select(data, groups$var_names) == 1)) {
-    stop('All dummy values must be 0 or 1')
-  }
-  groups <- 
-    dplyr::mutate(groups, 
-                  group = stringr::str_remove(var_names, 
-                                              paste0("[", sep, "].*$"))
-    )
-  groups <- 
-    dplyr::group_by(groups, group)
-  groups <- 
-    tidyr::nest(groups, grouped_cols = var_names)
-  groups <- 
-    dplyr::mutate(groups, grouped_cols = purrr::map(grouped_cols, c))
-  groups <- 
-    tidyr::unnest(groups, cols = grouped_cols)
-  groups <- 
-    tibble::deframe(groups)
+  # get the groups name for column selection after
+  groups <- unique(tmp$groups)
   
-  # function for determining which column has a 1 and retrieving that column 
-  # name (and drop the group name)
-  convert <- function(x){
-    if(sum(x) > 1) return('multiple')
-    if(sum(x) <= 0) return(NA_character_)
-    x <- dplyr::rename_all(x, stringr::str_remove, 
-                           paste0('^[^', sep, ']*[', sep, ']'))
-    x <- tidyr::pivot_longer(x, cols = everything(), 
-                             names_to = 'V1', 
-                             values_to = 'V2')
-    x <- dplyr::filter(x, V2 == 1) 
-    return(x$V1)
+  
+  # keep only non dummy value and do not keep temp value col
+  tmp <- dplyr::select(
+    dplyr::filter(tmp, value == 1),
+    -value)
+  
+  # function to return 'multiple' if more than 1 value is present
+  ret_multiple <- function(x){
+    if(length(x) > 1) return('multiple')
+    return(x)
   }
   
-  # nest the dummy groups and convert them to factors
-  data <- dplyr::group_by(data, id = dplyr::row_number())
-  data <- 
-    tidyr::nest(data, !!!groups) 
-  data <- dplyr::mutate_at(data, names(groups), purrr::map_chr, convert)
-  data <- dplyr::ungroup(data)
-  data <- dplyr::select(data, -id)
+  
+  # tranform to wide format   
+  tmp <- tidyr::pivot_wider(
+    tmp,
+    names_from = groups, 
+    values_from = levels, 
+    values_fn = list(levels = ret_multiple))
+  
+  
+  # convert to factors the groups column
+  dplyr::mutate_at(
+    tmp,
+    groups,
+    ~ forcats::as_factor(.)
+  )
 }
-new_dat <- dummy_to_factor(GermanCredit[1:10, ])
+
+  
+ 
+new_dat <- dummy_to_factor(GermanCredit)
 tibble::glimpse(new_dat)
-system.time(dummy_to_factor(GermanCredit[1:10, ]))
-system.time(dummy_to_factor(GermanCredit[1:50, ]))
-system.time(dummy_to_factor(GermanCredit))
+
+dat <- dplyr::rename_all(GermanCredit, stringr::str_replace, pattern = '[.]', replacement = '_')
+dplyr::glimpse(dummy_to_factor(dat, sep = '_', tidyselect::starts_with('P')))
+
