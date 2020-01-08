@@ -15,9 +15,5 @@ featured_image: ''
 featured_image_preview: ''
 
 comment: true
-toc: false
-autoCollapseToc: true
 math: false
 ---
-
-<!--more-->
