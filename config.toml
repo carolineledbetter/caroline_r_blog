@@ -1,25 +1,26 @@
 baseURL = "https://carolineledbetter.us/"
-languageCode = "en"                                      # website language
-defaultContentLanguage = "en"                            # [en, zh, ...] determines which i18n file to use
-title = "Caroline Ledbetter"                            # website title
+languageCode = "en"                                   # website language
+defaultContentLanguage = "en"                         # [en, zh, ...] determines which i18n file to use
+title = "Caroline Ledbetter"                          # website title
 theme = "LoveIt"
-enableGitInfo = false                                    # whether to use git commit log to generate lastmod record
-hasCJKLanguage = false                                   # whether to include chinese/japanese/korean
-paginate = 12                                            # default amount of posts in each pages
-enableEmoji = true                                       # whether to use emoji code
-enableRobotsTXT = true                                   # whether to use robots.txt
-googleAnalytics = ""                                     # [UA-XXXXXXXX-X] google analytics code
-disqusShortname = "carolineledbetter-us"                             # Disqus shortname to use Disqus in posts
+enableGitInfo = false                                 # whether to use git commit log to generate lastmod record
+hasCJKLanguage = false                                # whether to include chinese/japanese/korean
+paginate = 12                                         # default amount of posts in each pages
+enableEmoji = true                                    # whether to use emoji code
+enableRobotsTXT = true                                # whether to use robots.txt
+googleAnalytics = ""                                  # [UA-XXXXXXXX-X] google analytics code
+disqusShortname = "carolineledbetter-us"              # Disqus shortname to use Disqus in posts
 copyright = "This work is licensed under a Creative Commons Attribution-NonCommercial 4.0 International License."
-                                                         # copyright description used only for seo schema
+                                                      # copyright description used only for seo schema
 ignoreFiles = ["\\.Rmd$", "\\.Rmarkdown$", "_files$", "_cache$", "\\.R"]
-                                                      #### Syntax Highlighting (https://gohugo.io/content-management/syntax-highlighting)
+
+#### Syntax Highlighting (https://gohugo.io/content-management/syntax-highlighting)
 pygmentsOptions = "linenos=table"
 pygmentsCodefences = true
 pygmentsUseClasses = true
 pygmentsCodefencesGuessSyntax = true
 
-staticDir = ["static", "../assets/others"]               # static directories
+staticDir = ["static", "../assets/others"]            # static directories
 
 [author]                                              #### Author Info
   name = "Caroline Ledbetter"
@@ -65,35 +66,37 @@ staticDir = ["static", "../assets/others"]               # static directories
 
 
 [params]
-  version = "5.x"                                        # LoveIt theme version
-  description = "Caroline's Webpage for Cool Stuff"                      # site description
-  keywords = ["Caroline Ledbetter", "R", "Blog"]                   # site keywords
+  version = "5.x"                                     # LoveIt theme version
+  description = "Caroline's Webpage for Cool Stuff"   # site description
+  keywords = ["Caroline Ledbetter", "R", "Blog"]      # site keywords
 
                                                       #### Home Page Info
-  home_mode = "post"                                     # [post, other] home mode
-  home_paginate = 6                                      # special amount of posts in each home post page
-  avatar = "images/sealion.png"                           # URL of avatar shown in home page
-  subtitle = "lessons learned along the way"  # subtitle shown in home page
+  home_mode = "post"                                  # [post, other] home mode
+  home_paginate = 6                                   # special amount of posts in each home post page
+  avatar = "images/sealion.png"                       # URL of avatar shown in home page
+  subtitle = "lessons learned along the way"          # subtitle shown in home page
 
-  socialShare = true                                     # whether to show social share links in post page
+  socialShare = true                                  # whether to show social share links in post page
 
-                                                      #### Footer CopyRight Info
-  since = 2019                                           # Site creation time
+#### Footer CopyRight Info
+  since = 2019                                        # Site creation time
   license= '<a rel="license external nofollow noopener noreffer" href="https://creativecommons.org/licenses/by-nc/4.0/" target="_blank">CC BY-NC 4.0</a>'
-                                                         # license info (HTML format is allowed)
-  gitRepo = ""                                           # public git repo url to link lastmod git commit only then enableGitInfo is true
+                                                      # license info (HTML format is allowed)
+  gitRepo = "https://github.com/ledbettc/caroline_r_blog"   
+  # public git repo url to link lastmod git commit only then enableGitInfo is true
 
-  linkToMarkdown = true                                  # whether to show link to Raw Markdown content of the post
+  linkToMarkdown = true                               # whether to show link to Raw Markdown content of the post
 
-                                                      #### site verification code for Google/Bing/Yandex/Pinterest/Baidu
+#### site verification code for Google/Bing/Yandex/Pinterest/Baidu
   google_verification = ""
   bing_verification = ""
   yandex_verification = ""
   pinterest_verification = ""
   baidu_verification = ""
 
-  [params.cdn]                                       #### CSS and JS Files CDN
-    fontawesome_free_css = ''                           # for example '<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free@5.10.1/css/all.min.css" integrity="sha256-fdcFNFiBMrNfWL6OcAGQz6jDgNTRxnrLEd4vJYFWScE=" crossorigin="anonymous">'
+#### CSS and JS Files CDN
+  [params.cdn]               
+    fontawesome_free_css = ''                         # for example '<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free@5.10.1/css/all.min.css" integrity="sha256-fdcFNFiBMrNfWL6OcAGQz6jDgNTRxnrLEd4vJYFWScE=" crossorigin="anonymous">'
     animate_css = ''
     gitalk_css = ''
     gitalk_js = ''
@@ -113,10 +116,10 @@ staticDir = ["static", "../assets/others"]               # static directories
     aplayer_js = ''
     meting_js = ''
 
-  [params.gravatar]                                      # Gravatar Info for preferred avatar in home page
+  [params.gravatar]                                   # Gravatar Info for preferred avatar in home page
     email = ""
 
-  [params.social]                                        # Social Info in home page
+  [params.social]                                     # Social Info in home page
     GitHub = "ledbettc"
     #Linkedin = "xxxx"
     Twitter = "@C_line_sealion"
@@ -175,7 +178,7 @@ staticDir = ["static", "../assets/others"]               # static directories
     #Mastodon = "xxxx"
     #Thingiverse = "xxxx"
 
-  [params.share]                                         # Social Share Links in post page
+  [params.share]                                      # Social Share Links in post page
     enable = true
     Twitter = true
     Facebook = true
@@ -188,30 +191,30 @@ staticDir = ["static", "../assets/others"]               # static directories
     #VKontakte = true
     #Weibo = true
 
-  [params.publisher]                                     # Publisher Info just for SEO
+  [params.publisher]                                  # Publisher Info just for SEO
     name = "Caroline Ledbetter"
     [params.publisher.logo]
       url = "logo.png"
       width = 127
       height = 40
 
-  [params.logo]                                          # Website Log Info just for SEO
+  [params.logo]                                       # Website Log Info just for SEO
     url = "logo.png"
     width = 127
     height = 40
 
-  [params.image]                                         # Website Image Info just for SEO
+  [params.image]                                      # Website Image Info just for SEO
     #url = "cover.png"
     #width = 800
     #height = 600
 
-  [params.gitalk]                                        # Gittalk Comment Config (https://github.com/gitalk/gitalk)
+  [params.gitalk]                                     # Gittalk Comment Config (https://github.com/gitalk/gitalk)
     owner = ""
     repo = ""
     clientId = ""
     clientSecret = ""
 
-  [params.valine]                                        # Valine Comment Config (https://github.com/xCss/Valine)
+  [params.valine]                                     # Valine Comment Config (https://github.com/xCss/Valine)
     enable = false
     appId = ""
     appKey = ""
