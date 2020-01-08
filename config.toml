@@ -14,11 +14,6 @@ copyright = "This work is licensed under a Creative Commons Attribution-NonComme
                                                       # copyright description used only for seo schema
 ignoreFiles = ["\\.Rmd$", "\\.Rmarkdown$", "_files$", "_cache$", "\\.R"]
 
-#### Syntax Highlighting (https://gohugo.io/content-management/syntax-highlighting)
-pygmentsOptions = "linenos=table"
-pygmentsCodefences = true
-pygmentsUseClasses = true
-pygmentsCodefencesGuessSyntax = true
 
 staticDir = ["static", "../assets/others"]            # static directories
 
@@ -77,6 +72,13 @@ staticDir = ["static", "../assets/others"]            # static directories
   subtitle = "lessons learned along the way"          # subtitle shown in home page
 
   socialShare = true                                  # whether to show social share links in post page
+
+# options for highlight.js (version, additional languages, and theme)
+   highlightjsVersion = "9.12.0"
+   highlightjsCDN = "//cdnjs.cloudflare.com/ajax/libs"
+   highlightjsLang = ["r", "yaml"]
+   highlightjsTheme = "atelier-heath-dark"
+   highlightjsThemeDark = "color-brewer"
 
 #### Footer CopyRight Info
   since = 2019                                        # Site creation time

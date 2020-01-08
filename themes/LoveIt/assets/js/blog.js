@@ -73,15 +73,6 @@ jQuery(function($) {
         });
     };
 
-    _Blog.chroma = function() {
-        const blocks = document.querySelectorAll('.highlight > .chroma');
-        for (let i = 0; i < blocks.length; i++) {
-            const block = blocks[i];
-            const afterHighLight = block.querySelector('pre.chroma > code');
-            const lang = afterHighLight ? afterHighLight.className : '';
-            block.className += ' ' + lang;
-        }
-    };
 
     _Blog.responsiveTable = function() {
         const tables = document.querySelectorAll('.post-content table');
