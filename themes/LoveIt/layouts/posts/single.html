@@ -3,6 +3,7 @@
 {{ define "content" }}
     {{ $publish_date := .PublishDate.Format (.Site.Params.dateFormatToUse | default "2006-01-02") }}
     {{ $author := .Site.Author.name }}
+    {{ $twitter := .Site.Params.Social.Twitter}}
     {{ if isset .Params "author" }}
        {{ $author = .Site.Author.name }}
     {{ end }}
@@ -13,6 +14,7 @@
         <div class="post-meta">
             <div class="post-meta-main">
                 <a class="author" href="{{.Site.BaseURL }}" rel="author"><i class="fas fa-user-circle fa-fw"></i>{{ $author }}&nbsp;</a>
+                <a class="author" href="https://twitter.com/{{ $twitter }}" rel="me noopener noreffer" target="_blank"><i class="fab fa-twitter fa-fw"></i>{{ $twitter }}&nbsp;</a>
                 {{ with .Params.categories -}}
                     <span class="post-category">
                         {{ T "included" }}
