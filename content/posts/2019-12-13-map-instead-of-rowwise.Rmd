@@ -8,6 +8,9 @@ categories:
 tags:
   - purr
   - tidyverse
+description: 'Possible purrr alternatives to rowwise'
+show_in_homepage: yes
+show_description: yes
   
 comment: true
 ---

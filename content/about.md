@@ -5,8 +5,10 @@ title: About Me
 ---
 
 Currently a collaborative biostatistician at the 
-[Colorado School of Public Health](http://www.ucdenver.edu/academics/colleges/PublicHealth/Academics/departments/Biostatistics/Pages/welcome.aspx). 
-R enthusiast and reproducible research evangelist.   
+[Colorado School of Public Health](http://www.ucdenver.edu/academics/colleges/PublicHealth/Academics/departments/Biostatistics/Pages/welcome.aspx).  
+R enthusiast and reproducible research evangelist. My reasearch interests include 
+working with secondary data sources - particulary Electronic Health Record data. 
+R passions include package development, writing functions and cool data vizualizations. 
 
 [Github: ledbettc](https://github.com/ledbettc/)    
 [Twitter: @C_line_sealion](https://twitter.com/C_line_sealion)   
@@ -21,6 +23,5 @@ R enthusiast and reproducible research evangelist.
 # Cool R Stuff
 [CIDAtools (R package)](https://github.com/ledbettc/CIDAtools/)  
 [Food Source Attribution (Shiny Web App)](https://coe-foodsafetytools.shinyapps.io/sourceattribution/)  
-[Data Dashboard (Shiny Web App)](https://cuanschutz-em.shinyapps.io/normoxia/)  
 
 
