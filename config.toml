@@ -196,17 +196,17 @@ staticDir = ["static", "../assets/others"]            # static directories
   [params.publisher]                                  # Publisher Info just for SEO
     name = "Caroline Ledbetter"
     [params.publisher.logo]
-      url = "images/sealion.png"
+      url = "logo.png"
       width = 127
       height = 105
 
   [params.logo]                                       # Website Log Info just for SEO
-    url = "images/sealion.png"
+    url = "logo.png"
     width = 127
     height = 105
 
   [params.image]                                      # Website Image Info just for SEO
-    url = "images/sealion.png"
+    url = "logo.png"
     width = 765
     height = 630
 
