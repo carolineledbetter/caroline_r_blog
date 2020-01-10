@@ -72,6 +72,7 @@ staticDir = ["static", "../assets/others"]            # static directories
   subtitle = "lessons learned along the way"          # subtitle shown in home page
 
   socialShare = true                                  # whether to show social share links in post page
+  twitterImage: "logo.png"
 
 # options for highlight.js (version, additional languages, and theme)
    highlightjsVersion = "9.12.0"
