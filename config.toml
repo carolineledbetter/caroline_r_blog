@@ -208,8 +208,8 @@ staticDir = ["static", "../assets/others"]            # static directories
 
   [params.image]                                      # Website Image Info just for SEO
     url = "images/sealion.png"
-    width = 765
-    height = 630
+    width = 127
+    height = 105
 
   [params.gitalk]                                     # Gittalk Comment Config (https://github.com/gitalk/gitalk)
     owner = ""
