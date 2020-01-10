@@ -19,7 +19,13 @@
             {{- with .Site.Params.license -}}
                 <span class="license">&nbsp;|&nbsp;{{ . | safeHTML }}</span>
             {{- end -}}
-        </div>
+            {{- with .Site.Params.gitRepo -}}
+                <span>&nbsp;|&nbsp;
+                    <a href = "{{ . | safeHTML }}">Source Repository</a>
+                </span>
+            {{- end -}}
+         
+         </div>
     </div>
         {{ partial "footer_highlightjs" . }}
 </footer>
