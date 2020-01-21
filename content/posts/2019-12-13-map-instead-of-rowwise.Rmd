@@ -11,9 +11,14 @@ tags:
 description: 'Possible purrr alternatives to rowwise'
 show_in_homepage: yes
 show_description: yes
+lastmod: '2020-01-21T17:20:00'
   
 comment: true
 ---
+**Update:**  
+```{r echo=FALSE}
+blogdown::shortcode('tweet', '1219270620258689024')
+```
 
 I recently came across 
 [this post on alternatives to rowwise](https://community.rstudio.com/t/dplyr-alternatives-to-rowwise/8071) 
