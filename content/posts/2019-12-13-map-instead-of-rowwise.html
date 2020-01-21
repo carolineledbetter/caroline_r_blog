@@ -39,14 +39,6 @@ nested columns with <code>map</code> in place of rowwise.</p>
 I’ve set up a data frame with integer, logical and character columns because
 most of what I use <code>rowwise</code> for is testing for conditions, the presence of a
 value or numeric manipulation (sum, min, etc.).</p>
-<style type="text/css">
-pre code, pre, code {
-  white-space: pre !important;
-  overflow-x: scroll !important;
-  word-break: keep-all !important;
-  word-wrap: initial !important;
-}
-</style>
 <pre class="r"><code>library(tidyverse)</code></pre>
 <pre class="r"><code>set.seed(1313)
 dat &lt;- tibble(!!!c(id = list(1:10), 

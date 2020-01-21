@@ -18,15 +18,6 @@ comment: yes
 math: no
 ---
 
-```{css, echo = FALSE}
-pre code, pre, code {
-  white-space: pre !important;
-  overflow-x: scroll !important;
-  word-break: keep-all !important;
-  word-wrap: initial !important;
-}
-```
-
 **Motivation**  
 I often have raw data where a variable has been provided as dummy variables 
 as opposed to a character/factor variable. For example `job_employed = 1`, 

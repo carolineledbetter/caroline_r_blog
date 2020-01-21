@@ -40,15 +40,6 @@ I've set up a data frame with integer, logical and character columns because
 most of what I use `rowwise` for is testing for conditions, the presence of a 
 value or numeric manipulation (sum, min, etc.).
 
-```{css, echo = FALSE}
-pre code, pre, code {
-  white-space: pre !important;
-  overflow-x: scroll !important;
-  word-break: keep-all !important;
-  word-wrap: initial !important;
-}
-```
-
 ```{r, message = F}
 library(tidyverse)
 ```
