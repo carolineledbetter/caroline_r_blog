@@ -11,7 +11,7 @@ tags:
 description: 'Possible purrr alternatives to rowwise'
 show_in_homepage: yes
 show_description: yes
-lastmod: '2020-01-21T17:20:00'
+lastmod: '2020-01-22T17:35:00'
   
 comment: true
 ---
@@ -66,16 +66,52 @@ dat &lt;- tibble(!!!c(id = list(1:10),
 <p><strong>use pmap</strong><br />
 <code>pmap</code> seems to be what I want when I really don’t have a grouping variable,
 I want to do something rowwise even if I have multiple observations (lines)
-per id and/or I really want a vector output. <code>pmap</code> takes the column names as
-the names of the arguments.</p>
+per id and/or I really want a vector output.
+<code>pmap</code> <strong><font color="red">takes the column names as
+the names of the arguments</font></strong>.</p>
 <pre class="r"><code>dat %&gt;% 
   select(starts_with(&#39;lgl&#39;)) %&gt;% 
   pmap_lgl(all)</code></pre>
 <pre><code>##  [1] FALSE FALSE FALSE FALSE FALSE FALSE FALSE FALSE FALSE FALSE</code></pre>
 <p>In the above example for the first row pmap would correspond to:<br />
 <code>all(lgl_1 = TRUE, lgl_2 = TRUE, lgl_3 = FALSE)</code> and thus it returns
-<code>FALSE</code>.</p>
-<p>It can be combined with <code>bind_cols</code> to append the vector as new column.</p>
+<code>FALSE</code>. A consequence of this is that if you have a function that has named
+arguments that are different, you will need to wrap it in an anonymous function.
+You will also need to exploit this fact when writing an anonymous function.</p>
+<pre class="r"><code># a function with named arguments that are different then our column names
+some_fxn &lt;- function(x, y, z){
+  paste(z, y, x, sep = &#39;,&#39;)
+}
+dat %&gt;% 
+  select(starts_with(&#39;chr&#39;)) %&gt;% 
+  pmap_chr(some_fxn)</code></pre>
+<pre><code>## Error in .f(chr_1 = .l[[1L]][[i]], chr_2 = .l[[2L]][[i]], chr_3 = .l[[3L]][[i]], : unused arguments (chr_1 = .l[[1]][[i]], chr_2 = .l[[2]][[i]], chr_3 = .l[[3]][[i]])</code></pre>
+<p>We can use an anonymous function to fix this.</p>
+<pre class="r"><code>dat %&gt;% 
+  select(starts_with(&#39;chr&#39;)) %&gt;% 
+  pmap_chr(function(chr_1, chr_2, chr_3){
+    some_fxn(chr_1, chr_2, chr_3)
+    })</code></pre>
+<pre><code>##  [1] &quot;C,B,B&quot; &quot;B,A,A&quot; &quot;C,A,B&quot; &quot;A,C,C&quot; &quot;B,C,A&quot; &quot;B,C,B&quot; &quot;A,C,C&quot; &quot;B,C,C&quot; &quot;C,C,C&quot;
+## [10] &quot;B,C,C&quot;</code></pre>
+<p>We will also need to name anonymous functions properly.</p>
+<pre class="r"><code>dat %&gt;% 
+  select(starts_with(&#39;chr&#39;)) %&gt;% 
+  pmap_chr(function(chr_1, chr_2, chr_3){
+    paste(chr_1, chr_2, chr_3, sep = &#39;,&#39;)
+    })</code></pre>
+<pre><code>##  [1] &quot;B,B,C&quot; &quot;A,A,B&quot; &quot;B,A,C&quot; &quot;C,C,A&quot; &quot;A,C,B&quot; &quot;B,C,B&quot; &quot;C,C,A&quot; &quot;C,C,B&quot; &quot;C,C,C&quot;
+## [10] &quot;C,C,B&quot;</code></pre>
+<p>Ellipses can also be used with anonymous functions.</p>
+<pre class="r"><code>dat %&gt;% 
+  select(starts_with(&#39;chr&#39;)) %&gt;% 
+  pmap_lgl(function(...){
+    arguments &lt;- list(...)
+    any(arguments == &#39;B&#39;)
+    })</code></pre>
+<pre><code>##  [1]  TRUE  TRUE  TRUE FALSE  TRUE  TRUE FALSE  TRUE FALSE  TRUE</code></pre>
+<p>If our output is a vector, we can use <code>pmap</code>
+combined with <code>bind_cols</code> to append the vector as new column.</p>
 <pre class="r"><code>dat %&gt;% 
   select(starts_with(&#39;int&#39;)) %&gt;% 
   pmap_int(sum) %&gt;% 

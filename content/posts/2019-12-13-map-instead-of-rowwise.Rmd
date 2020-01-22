@@ -11,7 +11,7 @@ tags:
 description: 'Possible purrr alternatives to rowwise'
 show_in_homepage: yes
 show_description: yes
-lastmod: '2020-01-21T17:20:00'
+lastmod: '2020-01-22T17:35:00'
   
 comment: true
 ---
@@ -64,8 +64,9 @@ dat
 **use pmap**  
 `pmap` seems to be what I want when I really don't have a grouping variable, 
 I want to do something rowwise even if I have multiple observations (lines) 
-per id and/or I really want a vector output. `pmap` takes the column names as
-the names of the arguments. 
+per id and/or I really want a vector output. 
+`pmap` **<font color="red">takes the column names as
+the names of the arguments</font>**. 
 
 ```{r}
 dat %>% 
@@ -75,9 +76,51 @@ dat %>%
  
 In the above example for the first row pmap would correspond to:  
 `all(lgl_1 = TRUE, lgl_2 = TRUE, lgl_3 = FALSE)` and thus it returns 
-`FALSE`. 
+`FALSE`. A consequence of this is that if you have a function that has named 
+arguments that are different, you will need to wrap it in an anonymous function. 
+You will also need to exploit this fact when writing an anonymous function. 
 
-It can be combined with `bind_cols` to append the vector as new column.  
+```{r, error = TRUE}
+# a function with named arguments that are different then our column names
+some_fxn <- function(x, y, z){
+  paste(z, y, x, sep = ',')
+}
+dat %>% 
+  select(starts_with('chr')) %>% 
+  pmap_chr(some_fxn)
+```
+
+We can use an anonymous function to fix this. 
+```{r}
+dat %>% 
+  select(starts_with('chr')) %>% 
+  pmap_chr(function(chr_1, chr_2, chr_3){
+    some_fxn(chr_1, chr_2, chr_3)
+    })
+```
+
+We will also need to name anonymous functions properly. 
+```{r}
+dat %>% 
+  select(starts_with('chr')) %>% 
+  pmap_chr(function(chr_1, chr_2, chr_3){
+    paste(chr_1, chr_2, chr_3, sep = ',')
+    })
+```
+
+Ellipses can also be used with anonymous functions. 
+```{r}
+dat %>% 
+  select(starts_with('chr')) %>% 
+  pmap_lgl(function(...){
+    arguments <- list(...)
+    any(arguments == 'B')
+    })
+```
+
+
+If our output is a vector, we can use `pmap` 
+combined with `bind_cols` to append the vector as new column.  
 
 ```{r}
 dat %>% 
