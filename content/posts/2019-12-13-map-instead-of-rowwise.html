@@ -9,8 +9,8 @@ tags:
   - purr
   - tidyverse
 description: 'Possible purrr alternatives to rowwise'
-show_in_homepage: yes
-show_description: yes
+show_in_homepage: true
+show_description: true
 lastmod: '2020-01-22T17:35:00'
   
 comment: true
@@ -189,11 +189,13 @@ of the <code>tidyselect::select_helpers</code> to group our variables.</p>
 <pre class="r"><code>dat %&gt;% 
   group_by(id) %&gt;% 
   mutate(sum = sum(starts_with(&#39;int&#39;)))</code></pre>
-<pre><code>## Error: No tidyselect variables were registered</code></pre>
+<pre><code>## Error: `starts_with()` must be used within a *selecting* function.
+## ℹ See &lt;https://tidyselect.r-lib.org/reference/faq-selection-context.html&gt;.</code></pre>
 <pre class="r"><code>dat %&gt;% 
   group_by(id) %&gt;% 
   mutate(sum = sum(select(starts_with(&#39;int&#39;))))</code></pre>
-<pre><code>## Error: No tidyselect variables were registered</code></pre>
+<pre><code>## Error: `starts_with()` must be used within a *selecting* function.
+## ℹ See &lt;https://tidyselect.r-lib.org/reference/faq-selection-context.html&gt;.</code></pre>
 <pre class="r"><code>## note as of the dev version of dplyr 0.8.99.9000 this no longer returns an</code></pre>
 <pre class="r"><code>## error but it sums the column positions and thus returns 9 (2 + 3 + 4). </code></pre>
 <p>Finally, don’t forget to ungroup!

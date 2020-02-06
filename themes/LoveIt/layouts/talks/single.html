@@ -1,0 +1,105 @@
+{{ define "title" }}{{ .Title }} | {{ .Site.Title }}{{ end }}
+
+{{ define "content" }}
+    {{ $talk_date := .Date.Format (.Site.Params.dateFormatToUse | default "2006-01-02") }}
+    {{ $talk_time := .Date.Format (.Site.Params.dateFormatToUse | default "15:04") }}
+    {{ $author := .Site.Author.name }}
+    {{ $twitter := .Site.Params.Social.Twitter}}
+    {{ if isset .Params "author" }}
+       {{ $author = .Site.Author.name }}
+    {{ end }}
+
+    <article class="post-warp">
+        <div class="post-meta">This is a test
+        <a href = ""> somelink</a></div>
+        <div class="post-meta">
+            <div class="post-meta-main">
+                <a class="author" href="{{.Site.BaseURL }}about/" rel="author"><i class="fas fa-user-circle fa-fw"></i>{{ $author }}&nbsp;</a>
+                {{ with .Params.categories -}}
+                    <span class="post-category">
+                        {{ T "included" }}
+                        {{ range . }}
+                            {{- $name := . -}}
+                            {{- with $.Site.GetPage "taxonomy" (printf "categories/%s" $name) | default ($.Site.GetPage "taxonomy" (printf "categories/%s" ($name | urlize))) -}}
+                                <i class="far fa-folder fa-fw"></i><a href="{{ .Permalink }}">{{ $name }}</a>
+                            {{ end -}}
+                        {{ end }}
+                    </span>
+                {{- end }}
+            </div>
+            <div class="post-meta-other">
+                <i class="far fa-calendar-alt fa-fw"></i> {{ $talk_date }}&nbsp;
+                <i class="far fa-clock fa-fw"></i> 
+                 {{ if eq $talk_time "00:00" }} 
+                    TBD
+                 {{else}}
+                 {{$talk_time}} 
+                 {{end}}&nbsp;
+                 
+            </div>
+            <div class="btn-links">
+                {{ if and (ne .Params.slide_url "") (isset .Params "slide_url")}}
+                <a class="btn btn-outline-primary my-1 mr-1 btn-sm" 
+                   href="{{ .Params.slide_url }}" 
+                   target="_blank" rel="noopener">
+                    <i class="fas fa-images mr-1"></i>
+                    slides
+                </a>
+                {{end}}
+                {{ if and (ne .Params.github_url "") (isset .Params "github_url")}}
+                <a class="btn btn-outline-primary my-1 mr-1 btn-sm" 
+                href="{{ .Params.github_url }}" target="_blank" rel="noopener">
+                    <i class="fab fa-github mr-1"></i>
+                    code
+                </a>
+                {{end}}
+            </div>
+            <p><a href = ""> test link </a></p>
+        </div>
+
+        {{ with .Params.featured_image }}
+            <div class="post-featured-image">
+                <img src=/images/loading.svg data-sizes=auto data-src={{ . }} alt="featured image" class="lazyload">
+            </div>
+        {{ end }}
+
+        
+
+        <div class="post-content">
+            {{ $content := .Content }}
+            {{ $REin := `<img src="([^"]+)" alt="([^"]+)?" />` }}
+            {{ $REout := "<figure><img src=/images/loading.svg data-sizes=auto data-src=$1 alt=$2 class=lazyload><figcaption class=image-caption>$2</figcaption></figure>" }}
+            {{ $content = replaceRE $REin $REout $content }}
+            {{ $REin = `<img src="([^"]+)" alt="([^"]+)?" title="([^"]+)?" />` }}
+            {{ $REout = "<figure><img src=/images/loading.svg data-src=$1 data-sizes=auto alt=$2 title=$3 class=lazyload><figcaption class=image-caption>$2</figcaption></figure>" }}
+            {{ $content = replaceRE $REin $REout $content }}
+            {{ $REin = `:\(([\w- ]+?)\):` }}
+            {{ $REout = `<i class="$1 fa-fw"></i>` }}
+            {{ $content = replaceRE $REin $REout $content }}
+            {{ $REin = `\[(.+?)\]\^\((.+?)\)` }}
+            {{ $REout = `<strong><ruby>$1<rt>$2</rt></ruby></strong>` }}
+            {{ $content = replaceRE $REin $REout $content }}
+            {{ $REin = `<sup>\[return\]</sup>` }}
+            {{ $REout = printf "<sup>[%s]</sup>" (T "return") }}
+            {{ $content = replaceRE $REin $REout $content }}
+            {{ $REin = `<(h[123456]) (id=".+?")>` }}
+            {{ $REout = `<a class="post-dummy-target" $2></a><$1>` }}
+            {{ $content = replaceRE $REin $REout $content }}
+            {{ $REin = `<(sup class="footnote-ref") (id="fnref:.+?")>` }}
+            {{ $REout = `<a class="post-dummy-target" $2></a><$1>` }}
+            {{ $content = replaceRE $REin $REout $content }}
+            {{ $REin = `<(li) (id="fn:.+?")>` }}
+            {{ $REout = `<$1><a class="post-dummy-target" $2></a>` }}
+            {{ $content = replaceRE $REin $REout $content }}
+            {{ $content | safeHTML }}
+        </div>
+
+        {{ partial "post/footer.html" . }}
+
+        <div class="post-comment">
+            {{ if ( .Params.comment | default true ) }}
+            {{ partial "comments.html" . }}
+            {{ end }}
+        </div>
+    </article>
+{{- end }}

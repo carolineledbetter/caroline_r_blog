@@ -9,8 +9,8 @@ tags:
   - purr
   - tidyverse
 description: 'Possible purrr alternatives to rowwise'
-show_in_homepage: yes
-show_description: yes
+show_in_homepage: true
+show_description: true
 lastmod: '2020-01-22T17:35:00'
   
 comment: true
