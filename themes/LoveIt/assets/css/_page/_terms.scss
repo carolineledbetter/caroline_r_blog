@@ -1,5 +1,9 @@
-.archive-item {
+.archive-item, .talk-item {
   margin-left: 2rem;
+}
+
+.talk-item {
+  margin-bottom: 1rem;
 }
 
 .categories-card {
@@ -31,7 +35,7 @@
   }
 }
 
-.archive-item-link {
+.archive-item-link, .talk-item-link {
   display: inline-block;
   text-decoration: none;
   overflow: hidden;
@@ -56,15 +60,25 @@
     }
   }
 }
-
-.archive-item-date {
+.talk-item-link{
+  color: $global-link-hover-color !important;
+}
+.archive-item-date, .talk-item-date {
   float: right;
   text-align: right;
+  
+}
+
+.archive-item-date{
   color: $global-font-secondary-color;
 
   .dark-theme & {
     color: $global-font-secondary-color-dark;
   }
+}
+
+.talk-item-date{
+  color: $post-link-hover-color !important;
 }
 
 .more-post {
