@@ -1,13 +1,14 @@
 /** Talk **/
-/**.talk-title {
-  margin: 0 !important;
-  font-size: 1.8rem;
-  line-height: 3rem;
+.talk-title {
+  margin-top: 10px !important;
+  margin-bottom: 10px !important;
+  font-size: 1.2rem;
 }
-**/
 .talk-meta {
-  font-size: .88rem;
-  color: rgba(85, 85, 85, 0.52941) !important;
+  font-size: 1.2rem;
+  color: $global-font-secondary-color !important;
+  position: relative;
+  left: 10%;
 
   span {
     display: inline-block;

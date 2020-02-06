@@ -2,50 +2,40 @@
 
 {{ define "content" }}
     {{ $talk_date := .Date.Format (.Site.Params.dateFormatToUse | default "2006-01-02") }}
-    {{ $talk_time := .Date.Format (.Site.Params.dateFormatToUse | default "15:04") }}
+    {{ $talk_time := .Date.Format (.Site.Params.dateFormatToUse | default "3:04 pm") }}
     {{ $author := .Site.Author.name }}
-    {{ if isset .Params "author" }}
-       {{ $author = .Site.Author.name }}
-    {{ end }}
+    {{ $desc := .Title}}
+    {{ if isset .Params "description"}}
+        {{ $desc = .Params.description}}
+    {{end}}
 
     <article class="post-warp">
-        <h1 class="post-title animated flipInX">{{ .Title }}</h1>
+        <h1 class="talk-title">{{ $desc }}</h1>
         <div class = "talk-meta">
-            <a class="author" href="{{.Site.BaseURL }}about/" rel="author">
-                    <i class="fas fa-user-circle fa-fw"></i>{{ $author }}&nbsp;
-            </a>
-             <i class="far fa-calendar-alt fa-fw"></i> {{ $talk_date }}&nbsp;
-            <i class="far fa-clock fa-fw"></i> 
-            {{ if eq $talk_time "00:00" }} 
+            {{ if ne .Title $desc}}
+                Event: &nbsp; 
+                <a href = "{{ .Params.event_url }}"> {{ .Title }}
+                </a>
+                <br>
+            {{end}}
+            Date: &nbsp; {{$talk_date}}
+            <br> 
+            Time: &nbsp; 
+            {{ if ne $talk_time "12:00 am"}}
+                {{$talk_time}}
+            {{ else }}
                 TBD
-            {{else}}
-                {{$talk_time}} 
-            {{end}}&nbsp;
-            
-            <div class="talk-meta">
-                {{ if isset .Params "slide_url"}}
-                    <a href="{{ .Params.slide_url }}" 
-                       target="_blank" rel="noopener">
-                       <i class="fas fa-images"></i>
-                       slides
-                    </a> &nbsp;
-                {{end}}
-            {{ if isset .Params "github_url"}}
-                <a href="{{ .Params.github_url }}" 
-                target="_blank" 
-                rel="noopener">
-                    <i class="fab fa-github"></i>
-                    code
-                </a> &nbsp;
+            {{ end }}
+            <br>
+            {{ if isset .Params "location"}}
+                Location: &nbsp; {{.Params.location}}
+                <br>
             {{end}}
             {{ if isset .Params "video_url"}}
-                <a href="{{ .Params.video_url }}" 
-                   target="_blank" rel="noopener">
-                    <i class="fas fa-video"></i>
-                    video
-                </a> &nbsp;
-            {{end}}
-        </div>
+            <a href = "{{ .Params.video_url }}">
+                Watch
+            </a>
+        {{end}}
         </div>
 
         {{ with .Params.featured_image }}
