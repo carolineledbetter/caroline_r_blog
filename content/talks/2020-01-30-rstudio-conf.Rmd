@@ -3,22 +3,34 @@ title: rstudio::conf
 author: Caroline Ledbetter
 date: '2020-01-30T15:05:00-00:00'
 publishDate: '2019-12-20T18:40:02-07:00'
-location: "San Francisco, CA"
+#end_date: 
+location: San Francisco, CA
 event_url: https://web.cvent.com/event/36ebe042-0113-44f1-8e36-b9bc5d0733bf/
-slide_url: ""
-github_url: "https://github.com/ledbettc/slides/tree/master/rprojects"
+slide_url: https://slides.carolineledbetter.us/rprojects/
+github_url: https://github.com/ledbettc/slides/tree/master/rprojects
+#video_url:
+
 slug: rstudio-conf
 categories:
   - R
-tags: []
-talk_keywords:
+tags: 
   - RProjects
   
-description: ''
+description: 'Rproject templates to automate and standardize your workflow'
 ---
-# [rstudio::conf 2020](https://web.cvent.com/event/36ebe042-0113-44f1-8e36-b9bc5d0733bf/summary?RefId=homepage-top&utm_campaign=Site%20Promo&utm_medium=Banner&utm_source=HomePage)
-Jan 20, 2020  
-*Rproject templates to automate and standardize your workflow*  
-[Slides](https://slides/carolineledbetter.us/rprojects/)
+Many teams and organizations have tasks and structures that are standard 
+across projects. Lack of consistency and documentation can lead to lost 
+productivity when team members join collaborations or previous work is 
+consulted by your future self. Setting up folder structures can be 
+particularly tedious. This talk will demonstrate using Rstudio project 
+templates as part of an organizational package to automatically setup file 
+structures, establish git repositories and add standardized readme files. 
+Project info can be 
+optionally stored so that project information can be easily added 
+automatically to the top of reports and included in snippets for code 
+file headers. Creating standard, easy to implement documentation and 
+procedures can be particularly effective in encouraging skeptical 
+collaborators to use git. The talk will showcase this functionality using the 
+CIDAtools package that we developed. 
 
 

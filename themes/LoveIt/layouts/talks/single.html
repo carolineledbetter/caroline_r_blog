@@ -4,57 +4,48 @@
     {{ $talk_date := .Date.Format (.Site.Params.dateFormatToUse | default "2006-01-02") }}
     {{ $talk_time := .Date.Format (.Site.Params.dateFormatToUse | default "15:04") }}
     {{ $author := .Site.Author.name }}
-    {{ $twitter := .Site.Params.Social.Twitter}}
     {{ if isset .Params "author" }}
        {{ $author = .Site.Author.name }}
     {{ end }}
 
     <article class="post-warp">
-        <div class="post-meta">This is a test
-        <a href = ""> somelink</a></div>
-        <div class="post-meta">
-            <div class="post-meta-main">
-                <a class="author" href="{{.Site.BaseURL }}about/" rel="author"><i class="fas fa-user-circle fa-fw"></i>{{ $author }}&nbsp;</a>
-                {{ with .Params.categories -}}
-                    <span class="post-category">
-                        {{ T "included" }}
-                        {{ range . }}
-                            {{- $name := . -}}
-                            {{- with $.Site.GetPage "taxonomy" (printf "categories/%s" $name) | default ($.Site.GetPage "taxonomy" (printf "categories/%s" ($name | urlize))) -}}
-                                <i class="far fa-folder fa-fw"></i><a href="{{ .Permalink }}">{{ $name }}</a>
-                            {{ end -}}
-                        {{ end }}
-                    </span>
-                {{- end }}
-            </div>
-            <div class="post-meta-other">
-                <i class="far fa-calendar-alt fa-fw"></i> {{ $talk_date }}&nbsp;
-                <i class="far fa-clock fa-fw"></i> 
-                 {{ if eq $talk_time "00:00" }} 
-                    TBD
-                 {{else}}
-                 {{$talk_time}} 
-                 {{end}}&nbsp;
-                 
-            </div>
-            <div class="btn-links">
-                {{ if and (ne .Params.slide_url "") (isset .Params "slide_url")}}
-                <a class="btn btn-outline-primary my-1 mr-1 btn-sm" 
-                   href="{{ .Params.slide_url }}" 
-                   target="_blank" rel="noopener">
-                    <i class="fas fa-images mr-1"></i>
-                    slides
-                </a>
+        <h1 class="post-title animated flipInX">{{ .Title }}</h1>
+        <div class = "talk-meta">
+            <a class="author" href="{{.Site.BaseURL }}about/" rel="author">
+                    <i class="fas fa-user-circle fa-fw"></i>{{ $author }}&nbsp;
+            </a>
+             <i class="far fa-calendar-alt fa-fw"></i> {{ $talk_date }}&nbsp;
+            <i class="far fa-clock fa-fw"></i> 
+            {{ if eq $talk_time "00:00" }} 
+                TBD
+            {{else}}
+                {{$talk_time}} 
+            {{end}}&nbsp;
+            
+            <div class="talk-meta">
+                {{ if isset .Params "slide_url"}}
+                    <a href="{{ .Params.slide_url }}" 
+                       target="_blank" rel="noopener">
+                       <i class="fas fa-images"></i>
+                       slides
+                    </a> &nbsp;
                 {{end}}
-                {{ if and (ne .Params.github_url "") (isset .Params "github_url")}}
-                <a class="btn btn-outline-primary my-1 mr-1 btn-sm" 
-                href="{{ .Params.github_url }}" target="_blank" rel="noopener">
-                    <i class="fab fa-github mr-1"></i>
+            {{ if isset .Params "github_url"}}
+                <a href="{{ .Params.github_url }}" 
+                target="_blank" 
+                rel="noopener">
+                    <i class="fab fa-github"></i>
                     code
-                </a>
-                {{end}}
-            </div>
-            <p><a href = ""> test link </a></p>
+                </a> &nbsp;
+            {{end}}
+            {{ if isset .Params "video_url"}}
+                <a href="{{ .Params.video_url }}" 
+                   target="_blank" rel="noopener">
+                    <i class="fas fa-video"></i>
+                    video
+                </a> &nbsp;
+            {{end}}
+        </div>
         </div>
 
         {{ with .Params.featured_image }}
@@ -96,10 +87,5 @@
 
         {{ partial "post/footer.html" . }}
 
-        <div class="post-comment">
-            {{ if ( .Params.comment | default true ) }}
-            {{ partial "comments.html" . }}
-            {{ end }}
-        </div>
     </article>
 {{- end }}
