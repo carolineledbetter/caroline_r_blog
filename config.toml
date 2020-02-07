@@ -27,6 +27,7 @@ staticDir = ["static", "../assets/others"]            # static directories
 
 [Permalinks]                                          #### Permalinks Info (https://gohugo.io/content-management/urls/#permalinks)
   posts = ":year/:month/:slug/"
+  talks = ":year/:slug/"
 
 [menu]                                                #### Menu Info
   [[menu.main]]

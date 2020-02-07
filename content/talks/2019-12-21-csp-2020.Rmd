@@ -1,19 +1,37 @@
 ---
-title: CSP 2020
+title: CSP
 author: Caroline Ledbetter
-date: '2020-02-20'
+date: '2020-02-20T17:30:00'
 publishDate: '2019-12-21'
 slug: csp-2020
+#end_date: 
 categories:
   - R
 tags:
   - Statistics
-lastmod: '2019-12-21T09:06:20-07:00'
-description: ''
-show_in_homepage: yes
+description: 'Step-Wedge Design to Evaluate the Effectiveness of Opioid Prescribing Aids'
+location: Sacremento, CA
+event_url: https://ww2.amstat.org/meetings/csp/2020/
+#slide_url: https://slides.carolineledbetter.us/csp2020/
+#github_url: https://github.com/ledbettc/slides/tree/master/csp2020
+#video_url: ''
+
 ---
-# [Conference on Statistical Practice](https://ww2.amstat.org/meetings/csp/2020/)  
-Feb 20, 2020  
- *Step-Wedge Design to Evaluate the Effectiveness of Opioid Prescribing Aids*   
-Not a talk, but I will be presenting my ePoster. If you are attending, stop by!
+
+*Not a talk, but I will be presenting my ePoster. If you are attending, 
+stop by!*  
+In 2017, 47,600 people died of an opioid overdose (68% of all overdose deaths). 
+Our study explores the effect of integrating the prescription drug monitoring 
+program into the electronic heath record on physician prescribing behaviors 
+in emergency department. Billions of dollars are being spent to reduce opioid 
+addiction in the US. Stakeholders need data on the most effective efforts but 
+given all the attention, guidelines and interventions, the actual effects of 
+interventions can be difficult to disentangle from secular time trends. 
+Instituting an intervention effort across multiple sites simultaneously 
+can be expensive. Through simulations, we demonstrate that three sites can 
+be used to evaluate the effects of an intervention using a step wedge design 
+even in the presence of complex secular time trends and site effects. 
+Our study found that introduction of the PDMP into the workflow did not 
+reduce overall opioid prescriptions but did reduce the prescribing rates in 
+high risk individuals. 
 

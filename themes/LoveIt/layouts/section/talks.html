@@ -1,0 +1,57 @@
+{{ define "title" }}{{ T "all" | humanize}}{{ T .Section | default .Section | humanize }} | {{ .Site.Title }}{{ end -}}
+
+{{ define "content" -}}
+    {{ $data := .Data -}}
+    <div class="post-warp archive">
+        <h2 class="post-title animated pulse faster">
+                {{ T "all" | humanize}}{{ T .Section | default .Section | humanize }}
+        </h2>
+
+        {{- range (.Paginate (.Pages.GroupByDate "2006")).PageGroups -}}
+            <h3>{{ .Key }}</h3>
+            {{- range .Pages -}}
+                {{ $desc := .Title}}
+                {{ if isset .Params "description"}}
+                    {{ $desc = .Params.description}}
+                {{end}}
+                <article class="talk-item">
+                    <a href="{{ .RelPermalink }}" class="talk-item-link">
+                        {{ .Title }}
+                    </a>
+                    <span class="talk-item-date">
+                        {{- .Date.Format (.Site.Params.dateFormatToUse | default "01-02") -}}
+                    </span> 
+                    <br>
+                    {{ if ne .Title $desc}}
+                        {{ $desc }}
+                    {{end}}
+                    <div class="btn-links">
+                {{ if isset .Params "slide_url"}}
+                <a class="talk-item-link" 
+                   href="{{ .Params.slide_url }}" 
+                   target="_blank" rel="noopener">
+                    <i class="fas fa-images"></i>
+                    slides &nbsp;
+                </a>
+                {{end}}
+                {{ if isset .Params "github_url"}}
+                <a class="talk-item-link" 
+                href="{{ .Params.github_url }}" target="_blank" rel="noopener">
+                    <i class="fab fa-github"></i>
+                    code &nbsp;
+                </a>
+                {{end}}
+                {{ if isset .Params "video_url"}}
+                <a class="talk-item-link" 
+                href="{{ .Params.github_url }}" target="_blank" rel="noopener">
+                    <i class="fas fa-video"></i>
+                    watch &nbsp;
+                </a>
+                {{end}}
+            </div>
+                </article>
+            {{- end -}}
+        {{- end -}}
+        {{- partial "paginator.html" . -}}
+    </div>
+{{- end }}
