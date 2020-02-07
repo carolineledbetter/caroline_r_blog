@@ -11,6 +11,29 @@
 
     <article class="post-warp">
         <h1 class="talk-title">{{ $desc }}</h1>
+        <div class="post-meta">
+        <div class="post-meta-main">
+            {{ if isset .Params "slide_url"}}
+                <a class="author" 
+                   href="{{ .Params.slide_url }}" 
+                   target="_blank" rel="noopener">
+                    slides |
+                </a>
+            {{end}}
+            {{ if isset .Params "github_url"}}
+                <a class="author" 
+                href="{{ .Params.github_url }}" target="_blank" rel="noopener">
+                    code |
+                </a>
+            {{end}}
+            {{ if isset .Params "video_url"}}
+                <a class="author" 
+                href="{{ .Params.github_url }}" target="_blank" rel="noopener">
+                    watch 
+                </a>
+            {{end}}
+        </div>
+        </div>
         <div class = "talk-meta">
             {{ if ne .Title $desc}}
                 Event: &nbsp; 
