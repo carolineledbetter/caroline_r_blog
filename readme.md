@@ -6,4 +6,4 @@ This site is created using
 [hugo](https://github.com/gohugoio/hugo)
 and the 
 [LoveIt theme](https://github.com/gohugoio/hugo). 
-It is still a work in progress. 
+
