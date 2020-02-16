@@ -1,0 +1,294 @@
+---
+title: A Tidymodels Workflow
+author: Caroline Ledbetter
+date: '2020-02-17'
+publishDate: '2020-02-17'
+slug: tidymodels-suite-demo
+categories:
+  - R
+tags:
+  - tidyverse
+  - tidymodels
+  - machine learning
+lastmod: '2020-02-15T19:54:17-07:00'
+description: ''
+show_in_homepage: yes
+show_description: 'Using the tidymodels package from beginning to end'
+license: ''
+featured_image: ''
+featured_image_preview: ''
+comment: yes
+math: no
+---
+
+
+
+{{% tweet "1204918320346157056" %}}
+<p>I have been trying to incorporate more of the <code>tidymodels</code> suite of packages
+into my predictive models workflow (<code>rsample</code>, <code>recipes</code>) but I find myself
+frequently falling back on <code>caret</code> for model tuning and fitting
+because it’s what I know. This post is a work through from start to finish using
+the <code>tidymodels</code> suite. This post is NOT a tutorial for supervised learning.
+It assumes you know how and why to split your data, resample, up/down sample,<br />
+tune parameters, evaluate models etc.
+If you are looking for guides for machine learning, I highly recommend:<br />
+:star:
+<a href="https://alison.rbind.io/post/2019-12-23-learning-to-teach-machines-to-learn/">Learning to teach machines to learn:</a>
+This post from Alison Hill is full of great resources.<br />
+:closed_book:<a href="http://appliedpredictivemodeling.com">Applied Predictive Modeling</a>
+by Max Kuhn and Kjell Johnson<br />
+:closed_book:
+<a href="https://www.springer.com/gp/book/9781461471370">Intro to Statisitcal Learning</a>
+by Gareth James, Daniela Witten, Trevor Hastie and Robert Tibshirani<br />
+:closed_book:
+<a href="https://www.springer.com/gp/book/9780387848570">The Elements of Statistical Learning</a>
+by Trevor Hastie, Robert Tibshirani and Jerome Friedman<br />
+—-<br />
+<strong>Let’s get started:</strong><br />
+From the tidymodels readme:</p>
+<blockquote>
+<p>tidymodels is a “meta-package” for modeling and statistical analysis
+that share the underlying design philosophy, grammar, and data structures
+of the tidyverse</p>
+</blockquote>
+<p><strong>The Data</strong><br />
+For this post I am going to use the
+<a href="http://archive.ics.uci.edu/ml/datasets/Statlog+(German+Credit+Data)">German Credit data</a>
+from the University of California Irving Machine Learning Repository. This
+data set is included in the caret package, but the categorical variables are
+dummy coded and I want to demonstrate some of the factor options in recipe, so
+I am converting the dummy variables<a href="#fn1" class="footnote-ref" id="fnref1"><sup>1</sup></a>.</p>
+<pre class="r"><code>library(tidymodels)
+library(tune)
+data(GermanCredit, package = &quot;caret&quot;) 
+german_credit &lt;- 
+  GermanCredit %&gt;% 
+  fct_dummy()
+glimpse(german_credit)
+## Observations: 1,000
+## Variables: 21
+## $ Duration                  &lt;int&gt; 6, 48, 12, 42, 24, 36, 24, 36, 12, 30, 12, …
+## $ Amount                    &lt;int&gt; 1169, 5951, 2096, 7882, 4870, 9055, 2835, 6…
+## $ InstallmentRatePercentage &lt;int&gt; 4, 2, 2, 2, 3, 2, 3, 2, 2, 4, 3, 3, 1, 4, 2…
+## $ ResidenceDuration         &lt;int&gt; 4, 2, 3, 4, 4, 4, 4, 2, 4, 2, 1, 4, 1, 4, 4…
+## $ Age                       &lt;int&gt; 67, 22, 49, 45, 53, 35, 53, 35, 61, 28, 25,…
+## $ NumberExistingCredits     &lt;int&gt; 2, 1, 1, 1, 2, 1, 1, 1, 1, 2, 1, 1, 1, 2, 1…
+## $ NumberPeopleMaintenance   &lt;int&gt; 1, 1, 2, 2, 2, 2, 1, 1, 1, 1, 1, 1, 1, 1, 1…
+## $ Telephone                 &lt;dbl&gt; 0, 1, 1, 1, 1, 0, 1, 0, 1, 1, 1, 1, 0, 1, 1…
+## $ ForeignWorker             &lt;dbl&gt; 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1…
+## $ Class                     &lt;fct&gt; Good, Bad, Good, Good, Bad, Good, Good, Goo…
+## $ CheckingAccountStatus     &lt;fct&gt; lt.0, 0.to.200, none, lt.0, lt.0, none, non…
+## $ CreditHistory             &lt;fct&gt; Critical, PaidDuly, Critical, PaidDuly, Del…
+## $ Purpose                   &lt;fct&gt; Radio.Television, Radio.Television, Educati…
+## $ SavingsAccountBonds       &lt;fct&gt; Unknown, lt.100, lt.100, lt.100, lt.100, Un…
+## $ EmploymentDuration        &lt;fct&gt; gt.7, 1.to.4, 4.to.7, 4.to.7, 1.to.4, 1.to.…
+## $ Personal                  &lt;fct&gt; Male.Single, Female.NotSingle, Male.Single,…
+## $ OtherDebtorsGuarantors    &lt;fct&gt; None, None, None, Guarantor, None, None, No…
+## $ Property                  &lt;fct&gt; RealEstate, RealEstate, RealEstate, Insuran…
+## $ OtherInstallmentPlans     &lt;fct&gt; None, None, None, None, None, None, None, N…
+## $ Housing                   &lt;fct&gt; Own, Own, Own, ForFree, ForFree, ForFree, O…
+## $ Job                       &lt;fct&gt; SkilledEmployee, SkilledEmployee, Unskilled…</code></pre>
+<p><strong>Training Data and Testing Data using rsample</strong><br />
+The first thing I want to do is split my data into a training and testing set.
+<code>rsample</code> has a function <code>initial_split</code>
+that allows us to specify the proportion to be used for
+training (the default is 0.75) and a strata for stratified sampling (this allows
+us to ensure relative balance of our outcome between training and testing).
+A seed should always be set to ensure reproduciblity.
+<code>training</code> and <code>testing</code> functions then allow us to access the respective
+data.</p>
+<pre class="r"><code>set.seed(1450)
+credit_split &lt;- german_credit %&gt;% 
+  initial_split(prop = 0.75, strata = Class)
+credit_split
+## &lt;750/250/1000&gt;
+
+get_prop &lt;- function(data, variable){
+  data %&gt;% 
+    count({{variable}}) %&gt;% 
+    mutate(pct = n/sum(n))
+}
+map_dfr(list(training = training(credit_split), 
+             testing = testing(credit_split)), 
+    get_prop, variable = Class, 
+    .id = &#39;source&#39;)
+## # A tibble: 4 x 4
+##   source   Class     n   pct
+##   &lt;chr&gt;    &lt;fct&gt; &lt;int&gt; &lt;dbl&gt;
+## 1 training Bad     225   0.3
+## 2 training Good    525   0.7
+## 3 testing  Bad      75   0.3
+## 4 testing  Good    175   0.7</code></pre>
+<p>If we don’t set use stratified sampling for the outcome, we are likely to have
+some imbalance between training and testing as seem below.</p>
+<pre class="r"><code>set.seed(1450)
+credit_split_no_strata &lt;- german_credit %&gt;% 
+  initial_split(prop = 0.75)
+credit_split_no_strata
+## &lt;750/250/1000&gt;
+
+map_dfr(list(training = training(credit_split_no_strata), 
+             testing = testing(credit_split_no_strata)), 
+    get_prop, variable = Class, 
+    .id = &#39;source&#39;)
+## # A tibble: 4 x 4
+##   source   Class     n   pct
+##   &lt;chr&gt;    &lt;fct&gt; &lt;int&gt; &lt;dbl&gt;
+## 1 training Bad     215 0.287
+## 2 training Good    535 0.713
+## 3 testing  Bad      85 0.34 
+## 4 testing  Good    165 0.66</code></pre>
+<p>We will move forward with the training data from the stratified sampling.</p>
+<pre class="r"><code>training(credit_split) %&gt;% glimpse
+## Observations: 750
+## Variables: 21
+## $ Duration                  &lt;int&gt; 6, 48, 12, 42, 24, 24, 36, 12, 30, 12, 48, …
+## $ Amount                    &lt;int&gt; 1169, 5951, 2096, 7882, 4870, 2835, 6948, 3…
+## $ InstallmentRatePercentage &lt;int&gt; 4, 2, 2, 2, 3, 3, 2, 2, 4, 3, 3, 1, 2, 4, 4…
+## $ ResidenceDuration         &lt;int&gt; 4, 2, 3, 4, 4, 4, 2, 4, 2, 1, 4, 1, 4, 2, 4…
+## $ Age                       &lt;int&gt; 67, 22, 49, 45, 53, 53, 35, 61, 28, 25, 24,…
+## $ NumberExistingCredits     &lt;int&gt; 2, 1, 1, 1, 2, 1, 1, 1, 2, 1, 1, 1, 1, 1, 2…
+## $ NumberPeopleMaintenance   &lt;int&gt; 1, 1, 2, 2, 2, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1…
+## $ Telephone                 &lt;dbl&gt; 0, 1, 1, 1, 1, 1, 0, 1, 1, 1, 1, 0, 1, 1, 1…
+## $ ForeignWorker             &lt;dbl&gt; 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1…
+## $ Class                     &lt;fct&gt; Good, Bad, Good, Good, Bad, Good, Good, Goo…
+## $ CheckingAccountStatus     &lt;fct&gt; lt.0, 0.to.200, none, lt.0, lt.0, none, 0.t…
+## $ CreditHistory             &lt;fct&gt; Critical, PaidDuly, Critical, PaidDuly, Del…
+## $ Purpose                   &lt;fct&gt; Radio.Television, Radio.Television, Educati…
+## $ SavingsAccountBonds       &lt;fct&gt; Unknown, lt.100, lt.100, lt.100, lt.100, 50…
+## $ EmploymentDuration        &lt;fct&gt; gt.7, 1.to.4, 4.to.7, 4.to.7, 1.to.4, gt.7,…
+## $ Personal                  &lt;fct&gt; Male.Single, Female.NotSingle, Male.Single,…
+## $ OtherDebtorsGuarantors    &lt;fct&gt; None, None, None, Guarantor, None, None, No…
+## $ Property                  &lt;fct&gt; RealEstate, RealEstate, RealEstate, Insuran…
+## $ OtherInstallmentPlans     &lt;fct&gt; None, None, None, None, None, None, None, N…
+## $ Housing                   &lt;fct&gt; Own, Own, Own, ForFree, ForFree, Own, Rent,…
+## $ Job                       &lt;fct&gt; SkilledEmployee, SkilledEmployee, Unskilled…</code></pre>
+<p><strong>Preprocessing and Feature Engineering Using recipes</strong><br />
+Next we will preprocess the data using <code>recipes</code>.</p>
+<ul>
+<li>Our recipe will need a
+training data set and a formula, minimially.<br />
+</li>
+<li>One thing we may want to do
+is to consider the ordinal nature of <code>EmploymentDuration</code>.
+<ul>
+<li>First we need to
+make sure that the factors are ordered correctly.<br />
+</li>
+<li>Then we can use
+<code>step_ordinalscore</code> to convert an ordinal factor to a numeric score.<br />
+</li>
+</ul></li>
+<li>We can all convert our strings to factors<br />
+</li>
+<li>and center and scale our numerics.<br />
+</li>
+<li>Additional things that can be done we will skip:
+<ul>
+<li>impute missing values</li>
+<li>remove variables that are highly sparse and unbalanced</li>
+<li>up or down sample unbalanced outcomes</li>
+<li>filter the data using the same syntax as <code>filter</code></li>
+</ul></li>
+</ul>
+<p>There are many more steps available, the ref docs are
+<a href="https://tidymodels.github.io/recipes/reference/index.html">here.</a></p>
+<pre class="r"><code>our_recipe &lt;- 
+  training(credit_split) %&gt;% 
+  recipe(Class ~ .) %&gt;%
+  step_mutate(EmploymentDuration = factor(EmploymentDuration, 
+                                          levels = c(&#39;Unemployed&#39;, 
+                                                     &#39;lt.1&#39;, 
+                                                     &#39;1.to.4&#39;, 
+                                                     &#39;4.to.7&#39;, 
+                                                     &#39;gt.7&#39;), 
+                                          ordered = TRUE)
+              ) %&gt;% 
+  step_ordinalscore(EmploymentDuration) %&gt;% 
+  step_string2factor(all_nominal()) %&gt;% 
+  step_center(all_numeric()) %&gt;% 
+  step_scale(all_numeric()) %&gt;% 
+  # step_knnimpute(all_predictors()) %&gt;% 
+  # step_nzv(all_predictors()) %&gt;% 
+  # step_upsample(all_outcomes(), over_ratio = 1) %&gt;% 
+  # step_filter(age &gt; 70) %&gt;% 
+  prep
+  
+our_recipe
+## Data Recipe
+## 
+## Inputs:
+## 
+##       role #variables
+##    outcome          1
+##  predictor         20
+## 
+## Training data contained 750 data points and no missing data.
+## 
+## Operations:
+## 
+## Variable mutation for  EmploymentDuration [trained]
+## Scoring for EmploymentDuration [trained]
+## Factor variables from CheckingAccountStatus, CreditHistory, ... [trained]
+## Centering for Duration, Amount, ... [trained]
+## Scaling for Duration, Amount, ... [trained]</code></pre>
+<p>Once our recipe is ready to go, it’s time to juice!</p>
+<pre class="r"><code>training_data &lt;- juice(our_recipe) 
+glimpse(training_data)
+## Observations: 750
+## Variables: 21
+## $ Duration                  &lt;dbl&gt; -1.2315478, 2.2121945, -0.7395847, 1.720231…
+## $ Amount                    &lt;dbl&gt; -0.73994250, 0.95150421, -0.41205227, 1.634…
+## $ InstallmentRatePercentage &lt;dbl&gt; 0.90753844, -0.86499758, -0.86499758, -0.86…
+## $ ResidenceDuration         &lt;dbl&gt; 1.0639752, -0.7516821, 0.1561465, 1.0639752…
+## $ Age                       &lt;dbl&gt; 2.80830482, -1.18479796, 1.21106371, 0.8561…
+## $ NumberExistingCredits     &lt;dbl&gt; 1.0371211, -0.6875814, -0.6875814, -0.68758…
+## $ NumberPeopleMaintenance   &lt;dbl&gt; -0.4274592, -0.4274592, 2.3362855, 2.336285…
+## $ Telephone                 &lt;dbl&gt; -1.2692870, 0.7867934, 0.7867934, 0.7867934…
+## $ ForeignWorker             &lt;dbl&gt; 0.1855715, 0.1855715, 0.1855715, 0.1855715,…
+## $ CheckingAccountStatus     &lt;fct&gt; lt.0, 0.to.200, none, lt.0, lt.0, none, 0.t…
+## $ CreditHistory             &lt;fct&gt; Critical, PaidDuly, Critical, PaidDuly, Del…
+## $ Purpose                   &lt;fct&gt; Radio.Television, Radio.Television, Educati…
+## $ SavingsAccountBonds       &lt;fct&gt; Unknown, lt.100, lt.100, lt.100, lt.100, 50…
+## $ EmploymentDuration        &lt;dbl&gt; 1.3398920, -0.3238812, 0.5080054, 0.5080054…
+## $ Personal                  &lt;fct&gt; Male.Single, Female.NotSingle, Male.Single,…
+## $ OtherDebtorsGuarantors    &lt;fct&gt; None, None, None, Guarantor, None, None, No…
+## $ Property                  &lt;fct&gt; RealEstate, RealEstate, RealEstate, Insuran…
+## $ OtherInstallmentPlans     &lt;fct&gt; None, None, None, None, None, None, None, N…
+## $ Housing                   &lt;fct&gt; Own, Own, Own, ForFree, ForFree, Own, Rent,…
+## $ Job                       &lt;fct&gt; SkilledEmployee, SkilledEmployee, Unskilled…
+## $ Class                     &lt;fct&gt; Good, Bad, Good, Good, Bad, Good, Good, Goo…</code></pre>
+<p>The next thing I want to do is setup cross-validation to tune model parameters
+using my training data. We will go back to <code>rsample</code> for this.</p>
+<pre class="r"><code>(train_cv &lt;- 
+  training_data %&gt;% 
+  vfold_cv(v = 5, repeats = 3))
+## #  5-fold cross-validation repeated 3 times 
+## # A tibble: 15 x 3
+##    splits            id      id2  
+##    &lt;named list&gt;      &lt;chr&gt;   &lt;chr&gt;
+##  1 &lt;split [600/150]&gt; Repeat1 Fold1
+##  2 &lt;split [600/150]&gt; Repeat1 Fold2
+##  3 &lt;split [600/150]&gt; Repeat1 Fold3
+##  4 &lt;split [600/150]&gt; Repeat1 Fold4
+##  5 &lt;split [600/150]&gt; Repeat1 Fold5
+##  6 &lt;split [600/150]&gt; Repeat2 Fold1
+##  7 &lt;split [600/150]&gt; Repeat2 Fold2
+##  8 &lt;split [600/150]&gt; Repeat2 Fold3
+##  9 &lt;split [600/150]&gt; Repeat2 Fold4
+## 10 &lt;split [600/150]&gt; Repeat2 Fold5
+## 11 &lt;split [600/150]&gt; Repeat3 Fold1
+## 12 &lt;split [600/150]&gt; Repeat3 Fold2
+## 13 &lt;split [600/150]&gt; Repeat3 Fold3
+## 14 &lt;split [600/150]&gt; Repeat3 Fold4
+## 15 &lt;split [600/150]&gt; Repeat3 Fold5</code></pre>
+<div class="footnotes">
+<hr />
+<ol>
+<li id="fn1"><p>Alternatively the original data can be downloaded
+<a href="%22http://archive.ics.uci.edu/ml/machine-learning-databases/statlog/german/german.data%22">here</a>
+but this way gives relatively tidy variable names and factors. The code for
+converting to factors can be found in a
+<a href="https://carolineledbetter.us/2020/01/dummy-to-factor/">previous post.</a><a href="#fnref1" class="footnote-back">↩</a></p></li>
+</ol>
+</div>
