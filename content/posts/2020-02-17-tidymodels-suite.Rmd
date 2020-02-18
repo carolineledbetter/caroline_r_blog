@@ -1,0 +1,386 @@
+---
+title: A Tidymodels Workflow
+author: Caroline Ledbetter
+date: '2020-02-17'
+publishDate: '2020-02-21'
+slug: tidymodels-suite-demo
+categories:
+  - R
+tags:
+  - tidyverse
+  - tidymodels
+  - machine learning
+lastmod: '2020-02-15T19:54:17-07:00'
+description: ''
+show_in_homepage: yes
+show_description: 'Using the tidymodels package from beginning to end'
+license: ''
+featured_image: ''
+featured_image_preview: ''
+comment: yes
+math: no
+---
+```{r setup, include = FALSE}
+knitr::opts_chunk$set(collapse = TRUE)
+```
+
+```{r, include = FALSE}
+fct_dummy <- function(data, 
+                      variables = tidyselect::everything(), 
+                      sep = '.') {
+  variables <- rlang::enquo(variables)
+  # transform to long format the dummy columns
+  tmp <- 
+    tidyr::pivot_longer(data, 
+                        cols = intersect(tidyselect::contains(sep),  
+                                         !!variables),
+                        names_to = c("groups", "levels"),
+                        names_pattern = paste0("^([^'", sep, "]*)[", 
+                                               sep, "](.*)"))
+  
+  # get the groups name for column selection after
+  groups <- unique(tmp$groups)
+  
+  
+  # keep only non dummy value and do not keep temp value col
+  tmp <- dplyr::select(
+    dplyr::filter(tmp, value == 1),
+    -value)
+  
+  # function to return 'multiple' if more than 1 value is present
+  ret_multiple <- function(x){
+    if(length(x) > 1) return('multiple')
+    return(x)
+  }
+  
+  
+  # tranform to wide format   
+  tmp <- tidyr::pivot_wider(
+    tmp,
+    names_from = groups, 
+    values_from = levels, 
+    values_fn = list(levels = ret_multiple))
+  
+  
+  # convert to factors the groups column
+  dplyr::mutate_at(
+    tmp,
+    groups,
+    ~ forcats::as_factor(.)
+  )
+}
+```
+
+
+```{r echo=FALSE}
+blogdown::shortcode('tweet', '1204918320346157056')
+```
+
+I have been trying to incorporate more of the `tidymodels` suite of packages 
+into my predictive models workflow (`rsample`, `recipes`) but I find myself 
+frequently falling back on `caret` for model tuning and fitting 
+because it's what I know. This post is a work through from start to finish using 
+the `tidymodels` suite. This post is NOT a tutorial for supervised learning. 
+This post often makes choices for to better illustrate package functionality 
+rather than developing the best (or even a good) predictive model. 
+It assumes you know how and why to split your data, resample, up/down sample, 
+tune parameters, evaluate models etc. 
+If you are looking for guides for machine learning, I highly recommend:  
+:star: 
+[Learning to teach machines to learn:](https://alison.rbind.io/post/2019-12-23-learning-to-teach-machines-to-learn/) 
+This post from Alison Hill is FULL of great resources.  
+:closed_book:[Applied Predictive Modeling](http://appliedpredictivemodeling.com) 
+by Max Kuhn and Kjell Johnson  
+:closed_book:
+[Intro to Statisitcal Learning](https://www.springer.com/gp/book/9781461471370)
+by Gareth James, Daniela Witten, Trevor Hastie and Robert Tibshirani  
+:closed_book:
+[The Elements of Statistical Learning](https://www.springer.com/gp/book/9780387848570)
+by Trevor Hastie, Robert Tibshirani and Jerome Friedman  
+------  
+**Let's get started:**  
+From the tidymodels readme:  
+
+> tidymodels is a "meta-package" for modeling and statistical analysis
+> that share the underlying design philosophy, grammar, and data structures
+> of the tidyverse
+
+**The Data**  
+For this post I am going to use the 
+[German Credit data](http://archive.ics.uci.edu/ml/datasets/Statlog+(German+Credit+Data)) 
+from the University of California Irving Machine Learning Repository. This 
+data set is included in the caret package, but the categorical variables are 
+dummy coded and I want to demonstrate some of the factor options in recipe, so 
+I am converting the dummy variables[^1]. 
+
+```{r, message = FALSE}
+library(tidyverse)
+library(tidymodels)
+library(tune)
+library(workflows)
+data(GermanCredit, package = "caret") 
+glimpse(GermanCredit)
+```
+
+
+**Training Data and Testing Data using rsample**  
+The first thing I want to do is split my data into a training and testing set.
+`rsample` has a function `initial_split`
+that allows us to specify the proportion to be used for 
+training (the default is 0.75) and a strata for stratified sampling (this allows 
+us to ensure relative balance of our outcome between training and testing). 
+A seed should always be set to ensure reproducibility. 
+`training` and `testing` functions then allow us to access the respective
+data. 
+
+```{r}
+set.seed(1450)
+credit_split <- GermanCredit %>% 
+  initial_split(prop = 0.75, strata = Class)
+credit_split
+
+get_prop <- function(data, variable){
+  data %>% 
+    count({{variable}}) %>% 
+    mutate(pct = n/sum(n))
+}
+map_dfr(list(training = training(credit_split), 
+             testing = testing(credit_split)), 
+    get_prop, variable = Class, 
+    .id = 'source')
+```
+
+If we don't set use stratified sampling for the outcome, we are likely to have 
+some imbalance between training and testing as seen below. 
+
+```{r}
+set.seed(1450)
+credit_split_no_strata <- GermanCredit %>% 
+  initial_split(prop = 0.75)
+credit_split_no_strata
+
+map_dfr(list(training = training(credit_split_no_strata), 
+             testing = testing(credit_split_no_strata)), 
+    get_prop, variable = Class, 
+    .id = 'source')
+```
+
+We will move forward with the training data from the stratified sampling. 
+
+```{r}
+training(credit_split) %>% glimpse
+```
+
+**Preprocessing and Feature Engineering Using recipes**  
+![](/posts/images/recipes.png)
+"Artwork by ['@allison_horst'](https://github.com/allisonhorst/)"
+Next we will preprocess the data using `recipes`. 
+
+* Our recipe will need a 
+training data set and a formula, minimally.  
+* One thing we may want to do 
+is to consider the ordinal nature of `EmploymentDuration`.  
+    + First we need to 
+   make sure that the factors are ordered correctly.  
+    + Then we can use 
+   `step_ordinalscore` to convert an ordinal factor to a numeric score.  
+* We can all convert our strings to factors  
+* and center and scale our numerics.  
+* Additional things that can be done we will skip:
+    + impute missing values
+    + remove variables that are highly sparse and unbalanced
+    + up or down sample unbalanced outcomes
+    + filter the data using the same syntax as `filter`
+
+There are many more steps available, the ref docs are 
+[here.](https://tidymodels.github.io/recipes/reference/index.html) 
+
+When we have finished with our recipe we `prep`.
+
+```{r}
+our_recipe <- 
+  training(credit_split) %>% 
+  recipe(Class ~ .) %>% 
+  prep()
+
+```  
+
+
+```{r}
+our_recipe
+```
+
+Once our recipe is ready to go, it's time to juice!
+
+```{r, eval = FALSE}
+train <- our_recipe %>% 
+  prep() %>% 
+  juice()
+### equivilant to:
+# bake(our_recipe, training(credit_split))
+## when prep(retain = TRUE) (the default)
+## and no prep steps have skip = TRUE
+```
+
+As you can see, our training data is now updated with the recipe steps, 
+including the conversion of `EmploymentDuration` to an ordinal score. 
+
+```{r, eval = F}
+glimpse(train)
+```
+
+The next thing I want to do is setup cross-validation to tune model parameters
+using my training data. We will go back to `rsample` for this. 
+
+```{r}
+set.seed(2134)
+(cv_resamples <- 
+  training(credit_split) %>% 
+  vfold_cv(v = 10))
+```
+
+Alternatively, we could also use a bootstrap. 
+
+```{r, eval = FALSE}
+bt_resamples <- 
+  training(credit_split) %>% 
+  bootstraps(times = 10)
+```
+
+**Setting our engines using parsnip**  
+![](/posts/images/parsnip.png)
+"Artwork by ['@allison_horst'](https://github.com/allisonhorst/)"
+
+Parsnip allows us to specify models using a unified syntax regardless of the 
+syntax of the underlying engine. 
+All of the available parsnip models and engines can be found 
+[here.](https://tidymodels.github.io/parsnip/articles/articles/Models.html)
+The basic syntax for setting up a parsnip model is 
+`model(mode) %>% set_engine` like this:
+
+```{r, eval = F}
+logistic_reg(mode = 'classification') %>% 
+  set_engine()
+rand_forest(mode = 'classification') %>% 
+  set_engine()
+```
+The specific arguments that are available for a given model type are found in 
+the model types documentation, ie `?rand_forest` tells us we can set `mtry`, 
+`trees`, and `min_n`
+
+Let's begin by setting up some model objects
+
+```{r}
+# logisitic regression
+log_reg_mod <- 
+  logistic_reg() %>%
+  set_engine("glm")%>% 
+  set_mode('classification')
+
+# random forest
+rf_mod <- rand_forest(
+  trees = tune(),
+  mtry = tune(),
+  min_n = tune(), 
+  mode = 'classification'
+  ) %>%
+  set_engine("ranger")
+
+#k nearest neighbors
+knn_mod <- 
+  nearest_neighbor(neighbors = tune(), 
+                   weight_func = tune()) %>% 
+  set_engine("kknn") %>% 
+  set_mode("classification")
+
+# boosted tree
+boost_trees <- 
+  boost_tree(
+  mode = "classification", 
+  mtry = tune(), 
+  trees = tune(), 
+  min_n = tune(), 
+  # only available for xgboost
+  tree_depth = tune(), 
+  learn_rate = tune()
+    ) 
+xboost_mod <- 
+  boost_trees %>% 
+  set_engine("xgboost")
+
+c50_mod <- 
+  boost_trees %>% 
+  set_engine('C5.0')
+
+```
+
+Notice that we set two different engines for boosted trees. 
+
+**Tuning with dials and tune**  
+The `dials` and `tune` packages together allow us to tune our models using the 
+cross-validation resample we set up above. We use dials to specify our tuning
+parameters. For clarity I have expliclity specified the package namespace, 
+even though dials and tune were loaded at the beginning. 
+
+```{r, eval = T}
+(ctrl <- control_grid(verbose = TRUE))
+set.seed(2117)
+(knn_grid <- knn_mod %>% 
+  parameters() %>% 
+  grid_regular(levels = c(15, 5)))
+knn_tune <- tune_grid(
+  our_recipe, 
+  model = knn_mod, 
+  resamples = cv_resamples, 
+  grid = knn_grid, 
+  control = ctrl
+)
+
+(rf_params <- 
+  dials::parameters(dials::trees(), 
+                    dials::min_n(), 
+                    finalize(mtry(), select(GermanCredit, -Class))
+                    ) %>% 
+  dials::grid_latin_hypercube(size = 3))
+ctrl <- control_grid()
+(rf_tune <- 
+    tune::tune_grid(
+      our_recipe, 
+      model = rf_mod, 
+      resamples = cv_resamples, 
+      grid = rf_params, 
+      control = ctrl
+    ))
+best_rf <-
+  select_best(rf_tune, metric = "roc_auc",  maximize = FALSE)
+best_rf
+rf_mod_final <- finalize_model(rf_mod, best_rf)
+```
+
+```{r, eval = F}
+our_rec_final <- prep(our_recipe)
+(credit_wfl <- 
+  workflow() %>% 
+  add_recipe(our_rec_final) %>% 
+  add_model(log_reg_mod))
+
+log_reg_fit <- 
+  fit(credit_wfl, data = train)
+
+rf_mod <- 
+  credit_wfl %>% 
+  update_model(rf_mod) %>% 
+  fit(data = train)
+
+```
+Notice that we set two different engines for boosted trees. 
+
+
+[^1]: Alternatively the original data can be downloaded 
+[here]("http://archive.ics.uci.edu/ml/machine-learning-databases/statlog/german/german.data")
+but I wanted tidy variable names and factors without an overly long post. 
+?The code for
+converting to factors can be found in a 
+[previous post.](https://carolineledbetter.us/2020/01/dummy-to-factor/) 
+
+

@@ -28,7 +28,7 @@
             {{end}}
             {{ if isset .Params "video_url"}}
                 <a class="author" 
-                href="{{ .Params.github_url }}" target="_blank" rel="noopener">
+                href="{{ .Params.video_url }}" target="_blank" rel="noopener">
                     watch 
                 </a>
             {{end}}
@@ -54,11 +54,6 @@
                 Location: &nbsp; {{.Params.location}}
                 <br>
             {{end}}
-            {{ if isset .Params "video_url"}}
-            <a href = "{{ .Params.video_url }}">
-                Watch
-            </a>
-        {{end}}
         </div>
 
         {{ with .Params.featured_image }}
