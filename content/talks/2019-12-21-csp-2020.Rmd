@@ -12,8 +12,8 @@ tags:
 description: 'Step-Wedge Design to Evaluate the Effectiveness of Opioid Prescribing Aids'
 location: Sacremento, CA
 event_url: https://ww2.amstat.org/meetings/csp/2020/
-#slide_url: https://slides.carolineledbetter.us/csp2020/
-#github_url: https://github.com/ledbettc/slides/tree/master/csp2020
+slide_url: https://slides.carolineledbetter.us/csp2020_poster/csp2020_poster.pdf
+github_url: https://github.com/ledbettc/slides/tree/master/csp2020_poster
 #video_url: ''
 
 ---
