@@ -17,7 +17,7 @@ featured_image_preview: ''
 location: 'Aurora, CO'
 event_url: ''
 slide_url: https://slides.carolineledbetter.us/tidymodels/
-github_url: https://github.com/ledbettc/slides/tree/master/tidymodels
+github_url: https://github.com/carolineledbetter/slides/tree/master/tidymodels
 #video_url: ''
 ---
 Talk for the machine learning reading group of the department of biostatistics
