@@ -86,7 +86,7 @@ staticDir = ["static", "../assets/others"]            # static directories
   since = 2019                                        # Site creation time
   license= '<a rel="license external nofollow noopener noreffer" href="https://creativecommons.org/licenses/by-nc/4.0/" target="_blank">CC BY-NC 4.0</a>'
                                                       # license info (HTML format is allowed)
-  gitRepo = "https://github.com/ledbettc/caroline_r_blog"   
+  gitRepo = "https://github.com/carolineledbetter/caroline_r_blog"   
   # public git repo url to link lastmod git commit only then enableGitInfo is true
 
   linkToMarkdown = true                               # whether to show link to Raw Markdown content of the post
@@ -124,7 +124,7 @@ staticDir = ["static", "../assets/others"]            # static directories
     email = ""
 
   [params.social]                                     # Social Info in home page
-    GitHub = "ledbettc"
+    GitHub = "carolineledbetter"
     #Linkedin = "xxxx"
     Twitter = "@C_line_sealion"
     #Instagram = "xxxx"
