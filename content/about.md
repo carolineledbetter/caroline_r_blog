@@ -11,7 +11,7 @@ working with secondary data sources - particulary Electronic Health Record data.
 R passions include package development, writing functions and cool data vizualizations. 
 
 [Resume](/ledbetter_resume.pdf)  
-[Github: ledbettc](https://github.com/carolineledbetter/)    
+[Github: carolineledbetter](https://github.com/carolineledbetter/)    
 [Twitter: @C_line_sealion](https://twitter.com/C_line_sealion)   
 [Email: carolineledbetter@yahoo.com](mailto:carolineledbetter@yahoo.com)    
 
