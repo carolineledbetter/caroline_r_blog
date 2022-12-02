@@ -1,17 +1,17 @@
 ---
-date: "2019-12-20"
+date: "2022-12-01"
 draft: false
 title: About Me
 ---
 
-Currently a collaborative biostatistician at the 
-[Colorado School of Public Health](http://www.ucdenver.edu/academics/colleges/PublicHealth/Academics/departments/Biostatistics/Pages/welcome.aspx).  
+Currently a Lead Data Scientist for 
+[Softheon, Inc](http://www.softheon.com).  
 R enthusiast and reproducible research evangelist. My reasearch interests include 
 working with secondary data sources - particulary Electronic Health Record data. 
 R passions include package development, writing functions and cool data vizualizations. 
 
 [Resume](/ledbetter_resume.pdf)  
-[Github: ledbettc](https://github.com/ledbettc/)    
+[Github: ledbettc](https://github.com/carolineledbetter/)    
 [Twitter: @C_line_sealion](https://twitter.com/C_line_sealion)   
 [Email: carolineledbetter@yahoo.com](mailto:carolineledbetter@yahoo.com)    
 
@@ -22,7 +22,7 @@ R passions include package development, writing functions and cool data vizualiz
 :mortar_board: BA Biochemistry, University of Colorado  
 
 # Cool R Stuff
-[CIDAtools (R package)](https://github.com/ledbettc/CIDAtools/)  
+[CIDAtools (R package)](https://github.com/carolineledbetter/CIDAtools/)  
 [Food Source Attribution (Shiny Web App)](https://coe-foodsafetytools.shinyapps.io/sourceattribution/)  
 
 # Publications
